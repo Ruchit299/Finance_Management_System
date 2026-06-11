@@ -5,16 +5,18 @@
   "main": "index.js",
   "scripts": {
     "start": "tsc & node dist/app/index.js",
-    "dev": "nodemon --watch src --ext ts --exec ts-node src/app/index.ts"
+    "dev": "nodemon --watch src --ext ts --exec tsx src/app/index.ts"
   },
   "author": "",
   "license": "ISC",
   "type": "module",
   "dependencies": {
     "bcrypt": "^6.0.0",
+    "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
+    "mysql2": "^3.22.5",
     "nodemon": "^3.1.14",
     "sequelize": "^6.37.8"
   },

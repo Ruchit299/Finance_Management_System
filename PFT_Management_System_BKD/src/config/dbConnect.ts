@@ -10,7 +10,17 @@ const DB_HOST: string = process.env.DB_HOST ?? 'localhost';
 
 const sequelize = new Sequelize(DB_NAME, DB_USERNAME, DB_PASSWORD, {
   host: DB_HOST,
-  dialect: DB_DIALECT
+  dialect: DB_DIALECT,
+  logging: true,
+  dialectOptions: {
+    connectTimeout: 60000
+  },
+  pool: {
+    max: 2,
+    min: 1,
+    acquire: 20000,
+    idle: 10000
+  }
 });
 
 export async function testDbConn(): Promise<void> {
