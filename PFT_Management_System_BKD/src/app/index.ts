@@ -20,7 +20,7 @@ app.use('/', new Log().requestLogger, router);
 // console.log(PORT);
 
 await testDbConn();
-// await sequelize.sync({alter: true}); 
+// await sequelize.sync({ alter: true });
 await sequelize.sync();
 
 app.listen(PORT, () => {

@@ -1,10 +1,6 @@
+import { IsEmail, IsString, MinLength, MaxLength, IsOptional, validateSync } from "class-validator";
+import { plainToInstance } from "class-transformer";
 import messages from "../../helper/constants/messages.ts";
-
-// Shared email validator
-const validateEmail = (email: string): boolean => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return typeof email === "string" && email.length <= 50 && emailRegex.test(email);
-};
 
 // Generic types for validation result
 interface ValidationErrorDetail {
@@ -20,132 +16,84 @@ interface ValidationResult<T> {
   validatedData?: T;
 }
 
-// Define expected payload shapes
-interface RegisterData {
+class RegisterDto {
+  @IsOptional()
+  @IsString()
   name?: string;
-  email: string;
+
+  @IsEmail({}, { message: messages.VALIDATION.EMAIL_INVALID })
+  @MaxLength(50, { message: messages.VALIDATION.EMAIL_INVALID })
+  email!: string;
+
+  @IsOptional()
   contact?: string | null;
-  password: string;
+
+  @IsString({ message: messages.VALIDATION.PASSWORD_INVALID })
+  @MinLength(6, { message: messages.VALIDATION.PASSWORD_INVALID })
+  password!: string;
 }
 
-interface LoginData {
-  email: string;
-  password: string;
+class LoginDto {
+  @IsEmail({}, { message: messages.VALIDATION.EMAIL_INVALID })
+  @MaxLength(50, { message: messages.VALIDATION.EMAIL_INVALID })
+  email!: string;
+
+  @IsString({ message: messages.VALIDATION.PASSWORD_INVALID })
+  @MinLength(6, { message: messages.VALIDATION.PASSWORD_INVALID })
+  password!: string;
 }
 
-interface ChangePasswordData {
-  email: string;
-  newPassword: string;
+class ChangePasswordDto {
+  @IsEmail({}, { message: messages.VALIDATION.EMAIL_INVALID })
+  @MaxLength(50, { message: messages.VALIDATION.EMAIL_INVALID })
+  email!: string;
+
+  @IsString({ message: messages.VALIDATION.NEWPASSWORD_INVALID })
+  @MinLength(6, { message: messages.VALIDATION.NEWPASSWORD_INVALID })
+  newPassword!: string;
 }
 
-interface FirstChangePasswordData {
-  newPassword: string;
+class FirstChangePasswordDto {
+  @IsString({ message: messages.VALIDATION.NEWPASSWORD_INVALID })
+  @MinLength(6, { message: messages.VALIDATION.NEWPASSWORD_INVALID })
+  newPassword!: string;
 }
 
-interface ForgotPasswordData {
-  email: string;
+class ForgotPasswordDto {
+  @IsEmail({}, { message: messages.VALIDATION.EMAIL_INVALID })
+  @MaxLength(50, { message: messages.VALIDATION.EMAIL_INVALID })
+  email!: string;
 }
 
-interface ResetPasswordData {
-  email: string;
-  newPassword: string;
+class ResetPasswordDto {
+  @IsEmail({}, { message: messages.VALIDATION.EMAIL_INVALID })
+  @MaxLength(50, { message: messages.VALIDATION.EMAIL_INVALID })
+  email!: string;
+
+  @IsString({ message: messages.VALIDATION.NEWPASSWORD_INVALID })
+  @MinLength(6, { message: messages.VALIDATION.NEWPASSWORD_INVALID })
+  newPassword!: string;
 }
 
-// REGISTER VALIDATION
-const validateRegister = (data: RegisterData): ValidationResult<RegisterData> => {
-  const errors: ValidationErrorDetail[] = [];
-
-  // if (!data.name || typeof data.name !== "string" || data.name.length < 3 || data.name.length > 50) {
-  //   errors.push({ message: messages.VALIDATION.NAME_INVALID });
-  // }
-
-  if (!data.email || !validateEmail(data.email)) {
-    errors.push({ message: messages.VALIDATION.EMAIL_INVALID });
+function validateDto<T extends object>(cls: new () => T, data: any): ValidationResult<T> {
+  const instance = plainToInstance(cls, data);
+  const errors = validateSync(instance, { skipMissingProperties: false, whitelist: true });
+  if (errors.length > 0) {
+    const details = errors.map((err) => {
+      const constraints = err.constraints ? Object.values(err.constraints) : [];
+      return { message: constraints[0] || "Validation failed" };
+    });
+    return { error: { details } };
   }
+  return { error: null, validatedData: instance };
+}
 
-  // if (
-  //   data.contact !== undefined &&
-  //   data.contact !== null &&
-  //   (typeof data.contact !== "string" || data.contact.length < 9 || data.contact.length > 12)
-  // ) {
-  //   errors.push({ message: messages.VALIDATION.CONTACT_INVALID });
-  // }
-
-  if (!data.password || typeof data.password !== "string" || data.password.length < 6) {
-    errors.push({ message: messages.VALIDATION.PASSWORD_INVALID });
-  }
-
-  return errors.length > 0 ? { error: { details: errors } } : { error: null, validatedData: data };
-};
-
-// LOGIN VALIDATION
-const validateLogin = (data: LoginData): ValidationResult<LoginData> => {
-  const errors: ValidationErrorDetail[] = [];
-
-  if (!data.email || !validateEmail(data.email)) {
-    errors.push({ message: messages.VALIDATION.EMAIL_INVALID });
-  }
-
-  if (!data.password || typeof data.password !== "string" || data.password.length < 6) {
-    errors.push({ message: messages.VALIDATION.PASSWORD_INVALID });
-  }
-
-  return errors.length > 0 ? { error: { details: errors } } : { error: null, validatedData: data };
-};
-
-// CHANGE PASSWORD VALIDATION
-const validateChangePassword = (data: ChangePasswordData): ValidationResult<ChangePasswordData> => {
-  const errors: ValidationErrorDetail[] = [];
-
-  if (!data.email || !validateEmail(data.email)) {
-    errors.push({ message: messages.VALIDATION.EMAIL_INVALID });
-  }
-
-  if (!data.newPassword || typeof data.newPassword !== "string" || data.newPassword.length < 6) {
-    errors.push({ message: messages.VALIDATION.NEWPASSWORD_INVALID });
-  }
-
-  return errors.length > 0 ? { error: { details: errors } } : { error: null, validatedData: data };
-};
-
-// FIRST CHANGE PASSWORD VALIDATION
-const validateFirstChangePassword = (
-  data: FirstChangePasswordData
-): ValidationResult<FirstChangePasswordData> => {
-  const errors: ValidationErrorDetail[] = [];
-
-  if (!data.newPassword || typeof data.newPassword !== "string" || data.newPassword.length < 6) {
-    errors.push({ message: messages.VALIDATION.NEWPASSWORD_INVALID });
-  }
-
-  return errors.length > 0 ? { error: { details: errors } } : { error: null, validatedData: data };
-};
-
-// FORGOT PASSWORD VALIDATION
-const validateForgotPassword = (data: ForgotPasswordData): ValidationResult<ForgotPasswordData> => {
-  const errors: ValidationErrorDetail[] = [];
-
-  if (!data.email || !validateEmail(data.email)) {
-    errors.push({ message: messages.VALIDATION.EMAIL_INVALID });
-  }
-
-  return errors.length > 0 ? { error: { details: errors } } : { error: null, validatedData: data };
-};
-
-// RESET PASSWORD VALIDATION
-const validateResetPassword = (data: ResetPasswordData): ValidationResult<ResetPasswordData> => {
-  const errors: ValidationErrorDetail[] = [];
-
-  if (!data.email || !validateEmail(data.email)) {
-    errors.push({ message: messages.VALIDATION.EMAIL_INVALID });
-  }
-
-  if (!data.newPassword || typeof data.newPassword !== "string" || data.newPassword.length < 6) {
-    errors.push({ message: messages.VALIDATION.NEWPASSWORD_INVALID });
-  }
-
-  return errors.length > 0 ? { error: { details: errors } } : { error: null, validatedData: data };
-};
+const validateRegister = (data: any) => validateDto(RegisterDto, data);
+const validateLogin = (data: any) => validateDto(LoginDto, data);
+const validateChangePassword = (data: any) => validateDto(ChangePasswordDto, data);
+const validateFirstChangePassword = (data: any) => validateDto(FirstChangePasswordDto, data);
+const validateForgotPassword = (data: any) => validateDto(ForgotPasswordDto, data);
+const validateResetPassword = (data: any) => validateDto(ResetPasswordDto, data);
 
 export {
   validateRegister,

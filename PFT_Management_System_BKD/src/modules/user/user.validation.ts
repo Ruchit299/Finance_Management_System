@@ -1,28 +1,6 @@
+import { IsEmail, IsString, MinLength, MaxLength, IsOptional, IsIn, validateSync } from "class-validator";
+import { plainToInstance } from "class-transformer";
 import messages from "../../helper/constants/messages.ts";
-
-interface UserData {
-  name: string;
-  email: string;
-  contact?: string | null;
-  password: string;
-  status?: number;
-}
-
-interface UserUpdateData {
-  name: string;
-  email: string;
-  contact?: string | null;
-  password?: string;
-  status?: number;
-}
-
-interface UserPatchData {
-  name?: string;
-  email?: string;
-  contact?: string | null;
-  password?: string;
-  status?: number;
-}
 
 interface ValidationError {
   message: string;
@@ -33,108 +11,110 @@ interface ValidationResult<T> {
   validatedData?: T;
 }
 
-const validateEmail = (email: string): boolean => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  return typeof email === "string" && email.length <= 50 && emailRegex.test(email);
-};
+class UserDto {
+  @IsString({ message: messages.VALIDATION.NAME_REQUIRED })
+  @MinLength(3, { message: messages.VALIDATION.NAME_REQUIRED })
+  @MaxLength(50, { message: messages.VALIDATION.NAME_REQUIRED })
+  name!: string;
 
-const validateUser = (data: UserData): ValidationResult<UserData> => {
-  const errors: ValidationError[] = [];
+  @IsEmail({}, { message: messages.VALIDATION.EMAIL_REQUIRED })
+  @MaxLength(50, { message: messages.VALIDATION.EMAIL_REQUIRED })
+  email!: string;
 
-  if (!data.name || typeof data.name !== "string" || data.name.length < 3 || data.name.length > 50) {
-    errors.push({ message: messages.VALIDATION.NAME_REQUIRED });
+  @IsOptional()
+  @IsString({ message: messages.VALIDATION.CONTACT_OPTIONAL_INVALID })
+  @MinLength(10, { message: messages.VALIDATION.CONTACT_OPTIONAL_INVALID })
+  @MaxLength(12, { message: messages.VALIDATION.CONTACT_OPTIONAL_INVALID })
+  contact?: string | null;
+
+  @IsString({ message: messages.VALIDATION.PASSWORD_REQUIRED })
+  @MinLength(6, { message: messages.VALIDATION.PASSWORD_REQUIRED })
+  password!: string;
+
+  @IsOptional()
+  status?: number;
+}
+
+class UserUpdateDto {
+  @IsString({ message: messages.VALIDATION.NAME_REQUIRED })
+  @MinLength(3, { message: messages.VALIDATION.NAME_REQUIRED })
+  @MaxLength(50, { message: messages.VALIDATION.NAME_REQUIRED })
+  name!: string;
+
+  @IsEmail({}, { message: messages.VALIDATION.EMAIL_REQUIRED })
+  @MaxLength(50, { message: messages.VALIDATION.EMAIL_REQUIRED })
+  email!: string;
+
+  @IsOptional()
+  @IsString({ message: messages.VALIDATION.CONTACT_OPTIONAL_INVALID })
+  @MinLength(10, { message: messages.VALIDATION.CONTACT_OPTIONAL_INVALID })
+  @MaxLength(12, { message: messages.VALIDATION.CONTACT_OPTIONAL_INVALID })
+  contact?: string | null;
+
+  @IsOptional()
+  @IsString({ message: messages.VALIDATION.PASSWORD_REQUIRED })
+  @MinLength(6, { message: messages.VALIDATION.PASSWORD_REQUIRED })
+  password?: string;
+
+  @IsOptional()
+  status?: number;
+}
+
+class UserPatchDto {
+  @IsOptional()
+  @IsString({ message: messages.VALIDATION.NAME_OPTIONAL_INVALID })
+  @MinLength(3, { message: messages.VALIDATION.NAME_OPTIONAL_INVALID })
+  @MaxLength(50, { message: messages.VALIDATION.NAME_OPTIONAL_INVALID })
+  name?: string;
+
+  @IsOptional()
+  @IsEmail({}, { message: messages.VALIDATION.EMAIL_INVALID })
+  @MaxLength(50, { message: messages.VALIDATION.EMAIL_INVALID })
+  email?: string;
+
+  @IsOptional()
+  @IsString({ message: messages.VALIDATION.CONTACT_INVALID })
+  @MinLength(10, { message: messages.VALIDATION.CONTACT_INVALID })
+  @MaxLength(12, { message: messages.VALIDATION.CONTACT_INVALID })
+  contact?: string | null;
+
+  @IsOptional()
+  @IsString({ message: messages.VALIDATION.PASSWORD_INVALID })
+  @MinLength(6, { message: messages.VALIDATION.PASSWORD_INVALID })
+  password?: string;
+
+  @IsOptional()
+  @IsIn([0, 1], { message: messages.VALIDATION.STATUS_INVALID })
+  status?: number;
+}
+
+function validateDto<T extends object>(cls: new () => T, data: any): ValidationResult<T> {
+  const instance = plainToInstance(cls, data);
+  const errors = validateSync(instance, { skipMissingProperties: false, whitelist: true });
+  if (errors.length > 0) {
+    const details = errors.map((err) => {
+      const constraints = err.constraints ? Object.values(err.constraints) : [];
+      return { message: constraints[0] || "Validation failed" };
+    });
+    return { error: { details } };
   }
+  return { error: null, validatedData: instance };
+}
 
-  if (!data.email || !validateEmail(data.email)) {
-    errors.push({ message: messages.VALIDATION.EMAIL_REQUIRED });
-  }
+const validateUser = (data: any) => validateDto(UserDto, data);
+const validateUserUpdate = (data: any) => validateDto(UserUpdateDto, data);
 
+const validateUserPatch = (data: any): ValidationResult<UserPatchDto> => {
   if (
-    data.contact !== undefined &&
-    data.contact !== null &&
-    (typeof data.contact !== "string" || data.contact.length < 10 || data.contact.length > 12)
+    data.name === undefined &&
+    data.email === undefined &&
+    data.contact === undefined &&
+    data.password === undefined &&
+    data.status === undefined
   ) {
-    errors.push({ message: messages.VALIDATION.CONTACT_OPTIONAL_INVALID });
+    return { error: { details: [{ message: messages.VALIDATION.USER_PATCH_FIELDS_REQUIRED }] } };
   }
-
-  if (!data.password || typeof data.password !== "string" || data.password.length < 6) {
-    errors.push({ message: messages.VALIDATION.PASSWORD_REQUIRED });
-  }
-
-  return errors.length > 0
-    ? { error: { details: errors } }
-    : { error: null, validatedData: data };
-};
-
-const validateUserUpdate = (data: UserUpdateData): ValidationResult<UserUpdateData> => {
-  const errors: ValidationError[] = [];
-
-  if (!data.name || typeof data.name !== "string" || data.name.length < 3 || data.name.length > 50) {
-    errors.push({ message: messages.VALIDATION.NAME_REQUIRED });
-  }
-
-  if (!data.email || !validateEmail(data.email)) {
-    errors.push({ message: messages.VALIDATION.EMAIL_REQUIRED });
-  }
-
-  if (
-    data.contact !== undefined &&
-    data.contact !== null &&
-    (typeof data.contact !== "string" || data.contact.length < 10 || data.contact.length > 12)
-  ) {
-    errors.push({ message: messages.VALIDATION.CONTACT_OPTIONAL_INVALID });
-  }
-
-  if (data.password !== undefined && (typeof data.password !== "string" || data.password.length < 6)) {
-    errors.push({ message: messages.VALIDATION.PASSWORD_REQUIRED });
-  }
-
-  return errors.length > 0
-    ? { error: { details: errors } }
-    : { error: null, validatedData: data };
-};
-
-const validateUserPatch = (data: UserPatchData): ValidationResult<UserPatchData> => {
-  const errors: ValidationError[] = [];
-
-  // if (!data.name && !data.email && data.contact === undefined && !data.password && data.status) {
-  //   errors.push({ message: messages.VALIDATION.USER_PATCH_FIELDS_REQUIRED });
-  // }
-  if (data.name === undefined && data.email === undefined && data.contact === undefined && data.password === undefined && data.status === undefined) {
-    errors.push({ message: messages.VALIDATION.USER_PATCH_FIELDS_REQUIRED });
-  }
-
-  if (
-    data.name !== undefined &&
-    (typeof data.name !== "string" || data.name.length < 3 || data.name.length > 50)
-  ) {
-    errors.push({ message: messages.VALIDATION.NAME_OPTIONAL_INVALID });
-  }
-
-  if (data.email !== undefined && !validateEmail(data.email)) {
-    errors.push({ message: messages.VALIDATION.EMAIL_INVALID });
-  }
-
-  if (
-    data.contact !== undefined &&
-    data.contact !== null &&
-    (typeof data.contact !== "string" || data.contact.length < 10 || data.contact.length > 12)
-  ) {
-    errors.push({ message: messages.VALIDATION.CONTACT_INVALID });
-  }
-
-  if (data.status !== undefined && (data.status !== 0 && data.status !== 1)) {
-    errors.push({ message: messages.VALIDATION.STATUS_INVALID });
-  }
-
-
-  if (data.password !== undefined && (typeof data.password !== "string" || data.password.length < 6)) {
-    errors.push({ message: messages.VALIDATION.PASSWORD_INVALID });
-  }
-
-  return errors.length > 0
-    ? { error: { details: errors } }
-    : { error: null, validatedData: data };
+  return validateDto(UserPatchDto, data);
 };
 
 export { validateUser, validateUserUpdate, validateUserPatch };
