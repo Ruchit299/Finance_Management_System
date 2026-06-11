@@ -57,13 +57,23 @@
                 <hr class="flex-grow-1 text-muted my-0">
               </div>
 
-              <form>
+              <!-- Error Alert -->
+              <div *ngIf="errorMessage" class="alert alert-danger d-flex align-items-center mb-3 py-2 small" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <div>{{ errorMessage }}</div>
+              </div>
+
+              <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
                 <!-- Email Input -->
                 <div class="mb-3">
                   <label for="email" class="form-label small fw-semibold text-secondary">Email Address</label>
                   <div class="input-group">
                     <span class="input-group-text bg-light border-end-0 text-secondary"><i class="bi bi-envelope"></i></span>
-                    <input type="email" id="email" class="form-control bg-light border-start-0 py-2" placeholder="name@example.com" required>
+                    <input type="email" id="email" formControlName="email" class="form-control bg-light border-start-0 py-2" placeholder="name@example.com" required>
+                  </div>
+                  <div *ngIf="loginForm.get('email')?.touched && loginForm.get('email')?.invalid" class="text-danger small mt-1">
+                    <span *ngIf="loginForm.get('email')?.errors?.['required']">Email is required.</span>
+                    <span *ngIf="loginForm.get('email')?.errors?.['email']">Please enter a valid email address.</span>
                   </div>
                 </div>
 
@@ -75,7 +85,11 @@
                   </div>
                   <div class="input-group">
                     <span class="input-group-text bg-light border-end-0 text-secondary"><i class="bi bi-lock"></i></span>
-                    <input type="password" id="password" class="form-control bg-light border-start-0 py-2" placeholder="••••••••" required>
+                    <input type="password" id="password" formControlName="password" class="form-control bg-light border-start-0 py-2" placeholder="••••••••" required>
+                  </div>
+                  <div *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.invalid" class="text-danger small mt-1">
+                    <span *ngIf="loginForm.get('password')?.errors?.['required']">Password is required.</span>
+                    <span *ngIf="loginForm.get('password')?.errors?.['minlength']">Password must be at least 6 characters long.</span>
                   </div>
                 </div>
 
@@ -88,7 +102,10 @@
                 </div>
 
                 <!-- Submit Button -->
-                <button type="submit" class="btn btn-primary btn-lg w-100 py-2 fs-6 fw-semibold shadow-sm mb-3">Sign In</button>
+                <button type="submit" [disabled]="isLoading" class="btn btn-primary btn-lg w-100 py-2 fs-6 fw-semibold shadow-sm mb-3">
+                  <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  <span>{{ isLoading ? 'Signing In...' : 'Sign In' }}</span>
+                </button>
 
                 <!-- Link to Register -->
                 <p class="text-center small text-secondary mb-0">

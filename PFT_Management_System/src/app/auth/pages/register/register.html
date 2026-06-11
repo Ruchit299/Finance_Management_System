@@ -35,13 +35,30 @@
                 <p class="text-secondary small">Get started with your free account today</p>
               </div>
 
-              <form>
+              <!-- Error Alert -->
+              <div *ngIf="errorMessage" class="alert alert-danger d-flex align-items-center mb-3 py-2 small" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <div>{{ errorMessage }}</div>
+              </div>
+
+              <!-- Success Alert -->
+              <div *ngIf="successMessage" class="alert alert-success d-flex align-items-center mb-3 py-2 small" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                <div>{{ successMessage }}</div>
+              </div>
+
+              <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
                 <!-- Name Input -->
                 <div class="mb-3">
                   <label for="name" class="form-label small fw-semibold text-secondary">Full Name</label>
                   <div class="input-group">
                     <span class="input-group-text bg-light border-end-0 text-secondary"><i class="bi bi-person"></i></span>
-                    <input type="text" id="name" class="form-control bg-light border-start-0 py-2" placeholder="John Doe" required>
+                    <input type="text" id="name" formControlName="name" class="form-control bg-light border-start-0 py-2" placeholder="John Doe" required>
+                  </div>
+                  <div *ngIf="registerForm.get('name')?.touched && registerForm.get('name')?.invalid" class="text-danger small mt-1">
+                    <span *ngIf="registerForm.get('name')?.errors?.['required']">Full Name is required.</span>
+                    <span *ngIf="registerForm.get('name')?.errors?.['minlength']">Name must be at least 3 characters.</span>
+                    <span *ngIf="registerForm.get('name')?.errors?.['maxlength']">Name cannot exceed 50 characters.</span>
                   </div>
                 </div>
 
@@ -50,7 +67,12 @@
                   <label for="email" class="form-label small fw-semibold text-secondary">Email Address</label>
                   <div class="input-group">
                     <span class="input-group-text bg-light border-end-0 text-secondary"><i class="bi bi-envelope"></i></span>
-                    <input type="email" id="email" class="form-control bg-light border-start-0 py-2" placeholder="name@example.com" required>
+                    <input type="email" id="email" formControlName="email" class="form-control bg-light border-start-0 py-2" placeholder="name@example.com" required>
+                  </div>
+                  <div *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.invalid" class="text-danger small mt-1">
+                    <span *ngIf="registerForm.get('email')?.errors?.['required']">Email is required.</span>
+                    <span *ngIf="registerForm.get('email')?.errors?.['email']">Please enter a valid email address.</span>
+                    <span *ngIf="registerForm.get('email')?.errors?.['maxlength']">Email cannot exceed 50 characters.</span>
                   </div>
                 </div>
 
@@ -59,7 +81,10 @@
                   <label for="contact" class="form-label small fw-semibold text-secondary">Contact Number (Optional)</label>
                   <div class="input-group">
                     <span class="input-group-text bg-light border-end-0 text-secondary"><i class="bi bi-telephone"></i></span>
-                    <input type="tel" id="contact" class="form-control bg-light border-start-0 py-2" placeholder="1234567890">
+                    <input type="tel" id="contact" formControlName="contact" class="form-control bg-light border-start-0 py-2" placeholder="1234567890">
+                  </div>
+                  <div *ngIf="registerForm.get('contact')?.touched && registerForm.get('contact')?.invalid" class="text-danger small mt-1">
+                    <span>Contact number must be between 10 and 12 digits.</span>
                   </div>
                 </div>
 
@@ -68,22 +93,32 @@
                   <label for="password" class="form-label small fw-semibold text-secondary">Password</label>
                   <div class="input-group">
                     <span class="input-group-text bg-light border-end-0 text-secondary"><i class="bi bi-lock"></i></span>
-                    <input type="password" id="password" class="form-control bg-light border-start-0 py-2" placeholder="••••••••" required>
+                    <input type="password" id="password" formControlName="password" class="form-control bg-light border-start-0 py-2" placeholder="••••••••" required>
+                  </div>
+                  <div *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.invalid" class="text-danger small mt-1">
+                    <span *ngIf="registerForm.get('password')?.errors?.['required']">Password is required.</span>
+                    <span *ngIf="registerForm.get('password')?.errors?.['minlength']">Password must be at least 6 characters long.</span>
                   </div>
                 </div>
 
                 <!-- Terms and Conditions Checkbox -->
                 <div class="mb-4">
                   <div class="form-check">
-                    <input type="checkbox" class="form-check-input" id="terms" required>
+                    <input type="checkbox" class="form-check-input" id="terms" formControlName="terms" required>
                     <label class="form-check-label small text-secondary" for="terms">
                       I agree to the <a href="#" class="text-decoration-none text-primary fw-semibold">Terms of Service</a> & <a href="#" class="text-decoration-none text-primary fw-semibold">Privacy Policy</a>
                     </label>
                   </div>
+                  <div *ngIf="registerForm.get('terms')?.touched && registerForm.get('terms')?.invalid" class="text-danger small mt-1">
+                    <span>You must agree to the terms and conditions.</span>
+                  </div>
                 </div>
 
                 <!-- Submit Button -->
-                <button type="submit" class="btn btn-primary btn-lg w-100 py-2 fs-6 fw-semibold shadow-sm mb-3">Sign Up</button>
+                <button type="submit" [disabled]="isLoading" class="btn btn-primary btn-lg w-100 py-2 fs-6 fw-semibold shadow-sm mb-3">
+                  <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  <span>{{ isLoading ? 'Creating Account...' : 'Sign Up' }}</span>
+                </button>
 
                 <!-- Link to Login -->
                 <p class="text-center small text-secondary mb-0">
