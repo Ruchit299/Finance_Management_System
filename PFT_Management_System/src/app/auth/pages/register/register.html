@@ -1,0 +1,100 @@
+<div class="min-vh-100 d-flex align-items-center justify-content-center bg-body-tertiary p-3">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12 col-lg-10 col-xl-8">
+        <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+          <div class="row g-0">
+            <!-- Left Info Panel (Hidden on mobile) -->
+            <div class="col-md-6 bg-primary bg-gradient d-none d-md-flex flex-column justify-content-between p-5 text-white">
+              <div>
+                <div class="d-flex align-items-center mb-5">
+                  <i class="bi bi-bank fs-2 me-2"></i>
+                  <span class="fs-4 fw-bold">PFT Portal</span>
+                </div>
+                <h1 class="display-6 fw-bold mb-3">Start Your Financial Journey</h1>
+                <p class="lead opacity-75">Create an account to unlock advanced budgeting tools, real-time analytics, and secure expense tracking.</p>
+              </div>
+              <div>
+                <div class="d-flex align-items-center gap-2 opacity-75 small">
+                  <i class="bi bi-shield-check"></i>
+                  <span>Secure 256-bit SSL encryption</span>
+                </div>
+                <hr class="opacity-25 my-3">
+                <p class="small mb-0 opacity-50">&copy; 2026 Personal Finance Tracker. All rights reserved.</p>
+              </div>
+            </div>
+
+            <!-- Right Form Panel -->
+            <div class="col-md-6 p-4 p-md-5 bg-white">
+              <div class="mb-4">
+                <div class="d-md-none d-flex align-items-center mb-4 text-primary">
+                  <i class="bi bi-bank fs-2 me-2"></i>
+                  <span class="fs-4 fw-bold">PFT Portal</span>
+                </div>
+                <h2 class="fw-bold text-dark">Create Account</h2>
+                <p class="text-secondary small">Get started with your free account today</p>
+              </div>
+
+              <form>
+                <!-- Name Input -->
+                <div class="mb-3">
+                  <label for="name" class="form-label small fw-semibold text-secondary">Full Name</label>
+                  <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0 text-secondary"><i class="bi bi-person"></i></span>
+                    <input type="text" id="name" class="form-control bg-light border-start-0 py-2" placeholder="John Doe" required>
+                  </div>
+                </div>
+
+                <!-- Email Input -->
+                <div class="mb-3">
+                  <label for="email" class="form-label small fw-semibold text-secondary">Email Address</label>
+                  <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0 text-secondary"><i class="bi bi-envelope"></i></span>
+                    <input type="email" id="email" class="form-control bg-light border-start-0 py-2" placeholder="name@example.com" required>
+                  </div>
+                </div>
+
+                <!-- Contact Input (Optional) -->
+                <div class="mb-3">
+                  <label for="contact" class="form-label small fw-semibold text-secondary">Contact Number (Optional)</label>
+                  <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0 text-secondary"><i class="bi bi-telephone"></i></span>
+                    <input type="tel" id="contact" class="form-control bg-light border-start-0 py-2" placeholder="1234567890">
+                  </div>
+                </div>
+
+                <!-- Password Input -->
+                <div class="mb-3">
+                  <label for="password" class="form-label small fw-semibold text-secondary">Password</label>
+                  <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0 text-secondary"><i class="bi bi-lock"></i></span>
+                    <input type="password" id="password" class="form-control bg-light border-start-0 py-2" placeholder="••••••••" required>
+                  </div>
+                </div>
+
+                <!-- Terms and Conditions Checkbox -->
+                <div class="mb-4">
+                  <div class="form-check">
+                    <input type="checkbox" class="form-check-input" id="terms" required>
+                    <label class="form-check-label small text-secondary" for="terms">
+                      I agree to the <a href="#" class="text-decoration-none text-primary fw-semibold">Terms of Service</a> & <a href="#" class="text-decoration-none text-primary fw-semibold">Privacy Policy</a>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn btn-primary btn-lg w-100 py-2 fs-6 fw-semibold shadow-sm mb-3">Sign Up</button>
+
+                <!-- Link to Login -->
+                <p class="text-center small text-secondary mb-0">
+                  Already have an account? 
+                  <a routerLink="/login" class="text-decoration-none text-primary fw-semibold">Sign In</a>
+                </p>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
