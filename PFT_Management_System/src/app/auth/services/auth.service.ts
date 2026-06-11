@@ -29,4 +29,18 @@ export class AuthService {
   clearToken(): void {
     localStorage.removeItem('token');
   }
+
+  saveUser(user: any): void {
+    localStorage.setItem('user', JSON.stringify(user));
+  }
+
+  getUser(): any | null {
+    const user = localStorage.getItem('user');
+    return user ? JSON.parse(user) : null;
+  }
+
+  logout(): void {
+    this.clearToken();
+    localStorage.removeItem('user');
+  }
 }

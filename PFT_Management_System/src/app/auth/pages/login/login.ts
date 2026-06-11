@@ -41,6 +41,7 @@ export class Login {
         this.isLoading = false;
         if (response.token) {
           this.authService.saveToken(response.token);
+          this.authService.saveUser(response.user);
           this.router.navigate(['/dashboard']);
         }
       },

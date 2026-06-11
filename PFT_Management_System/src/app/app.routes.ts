@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { LayoutComponent } from './layout/layout';
 
 export const routes: Routes = [
     {
@@ -14,10 +15,16 @@ export const routes: Routes = [
         path: 'register',
         loadComponent: () => import('../app/auth/pages/register/register').then(c => c.Register)
     },
-    // {
-    //     path: 'dashboard',
-    //     loadComponent: () => import('./pages/dashboard/dashboard.component').then(c => c.Dashboard)
-    // },
+    {
+        path: '',
+        component: LayoutComponent,
+        children: [
+            {
+                path: 'dashboard',
+                loadComponent: () => import('./non-auth/pages/dashboard/dashboard').then(c => c.Dashboard)
+            }
+        ]
+    },
     {
         path: '**',
         redirectTo: 'login'
