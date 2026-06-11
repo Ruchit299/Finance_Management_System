@@ -1,0 +1,154 @@
+<!-- Header Section -->
+<div class="row align-items-center justify-content-between mb-4 g-3">
+  <div class="col-12 col-md-6">
+    <h1 class="h2 fw-bold text-dark mb-1">Budget Management</h1>
+    <p class="text-secondary mb-0">Set monthly spending limits by category and track your real-time utilization.</p>
+  </div>
+  <div class="col-12 col-md-6 text-md-end d-flex align-items-center justify-content-md-end gap-3 flex-wrap">
+    <!-- Month Picker -->
+    <div class="d-flex align-items-center gap-2">
+      <label class="small fw-semibold text-secondary mb-0 text-nowrap">View Month:</label>
+      <input type="month" [(ngModel)]="selectedMonth" (change)="onMonthChange()" class="form-control bg-white py-1.5 px-3 rounded-pill border shadow-sm">
+    </div>
+    
+    <button (click)="openAddModal()" class="btn btn-primary btn-lg rounded-pill px-4 fw-semibold shadow-sm">
+      <i class="bi bi-plus-lg me-2"></i>Set Budget
+    </button>
+  </div>
+</div>
+
+<!-- Budgets Utilization Display -->
+<div class="card border-0 shadow-sm rounded-3 p-4 mb-4">
+  <div *ngIf="isLoading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="text-secondary mt-2 small">Retrieving budget trackers...</p>
+  </div>
+
+  <div *ngIf="!isLoading && budgets.length === 0" class="text-center py-5">
+    <i class="bi bi-sliders fs-1 text-secondary opacity-50"></i>
+    <h5 class="fw-bold text-dark mt-3">No Budgets Configured</h5>
+    <p class="text-secondary small mb-0">Set monthly spending limits for categories to track and visualizes outflows.</p>
+  </div>
+
+  <!-- Budgets Grid -->
+  <div class="row g-4" *ngIf="!isLoading && budgets.length > 0">
+    <div class="col-12 col-md-6 col-lg-4" *ngFor="let budget of budgets">
+      <div class="card border border-light shadow-sm rounded-4 p-4 position-relative overflow-hidden h-100">
+        <!-- Accent indicator for exceeded budget -->
+        <div *ngIf="budget.isExceeded" class="position-absolute top-0 start-0 w-100 bg-danger" style="height: 4px;"></div>
+        <div *ngIf="!budget.isExceeded && budget.percent >= 90" class="position-absolute top-0 start-0 w-100 bg-warning" style="height: 4px;"></div>
+
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <span class="badge bg-light text-dark border rounded-pill px-2.5 py-1.5 small fw-semibold">
+            {{ budget.category }}
+          </span>
+          <div class="d-flex gap-2">
+            <button (click)="openEditModal(budget)" class="btn btn-outline-secondary btn-sm p-1.5 border-0 rounded-circle" title="Edit limit">
+              <i class="bi bi-pencil-square"></i>
+            </button>
+            <button (click)="deleteBudget(budget.id)" class="btn btn-outline-danger btn-sm p-1.5 border-0 rounded-circle" title="Delete budget">
+              <i class="bi bi-trash"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Budget Tracker Details -->
+        <div class="mb-3">
+          <div class="d-flex align-items-baseline gap-1">
+            <h3 class="fw-bold text-dark mb-0">₹{{ budget.spent | number:'1.2-2' }}</h3>
+            <span class="text-secondary small">/ ₹{{ budget.amount | number:'1.0-0' }}</span>
+          </div>
+          <span class="text-secondary small fw-medium">Spent this month</span>
+        </div>
+
+        <!-- Progress bar tracking -->
+        <div class="progress mb-2" style="height: 8px;">
+          <div class="progress-bar rounded-pill"
+               [ngClass]="budget.isExceeded ? 'bg-danger' : (budget.percent >= 90 ? 'bg-warning' : 'bg-success')"
+               role="progressbar" [style.width.%]="budget.percent > 100 ? 100 : budget.percent"
+               [attr.aria-valuenow]="budget.percent" aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+
+        <!-- Utilization indicators -->
+        <div class="d-flex align-items-center justify-content-between">
+          <span class="small" [ngClass]="budget.isExceeded ? 'text-danger fw-semibold' : 'text-secondary'">
+            {{ budget.percent }}% utilized
+          </span>
+          
+          <!-- Alerts when budget limit is reached or exceeded -->
+          <span *ngIf="budget.isExceeded" class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill small py-1 px-2.5 d-inline-flex align-items-center gap-1 animate-pulse">
+            <i class="bi bi-exclamation-triangle-fill"></i> Exceeded
+          </span>
+          <span *ngIf="!budget.isExceeded && budget.percent >= 90" class="badge bg-warning-subtle text-warning border border-warning-subtle rounded-pill small py-1 px-2.5">
+            <i class="bi bi-exclamation-circle-fill"></i> Limit Warning
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Custom Modal Backdrop -->
+<div *ngIf="showFormModal" class="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-flex align-items-center justify-content-center z-3">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+        <div class="card border-0 shadow-lg rounded-4 p-4">
+          <!-- Modal Header -->
+          <div class="d-flex align-items-center justify-content-between mb-4 border-bottom pb-2">
+            <h4 class="fw-bold text-dark mb-0">{{ isEditing ? 'Edit Budget Limit' : 'Set Category Budget' }}</h4>
+            <button (click)="closeModal()" class="btn-close shadow-none" type="button" aria-label="Close"></button>
+          </div>
+
+          <!-- Alert Messages -->
+          <div *ngIf="errorMessage" class="alert alert-danger py-2 small mb-3" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ errorMessage }}
+          </div>
+          <div *ngIf="successMessage" class="alert alert-success py-2 small mb-3" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>{{ successMessage }}
+          </div>
+
+          <!-- Modal Body / Form -->
+          <form [formGroup]="budgetForm" (ngSubmit)="saveBudget()">
+            <!-- Category (Disabled when editing) -->
+            <div class="mb-3">
+              <label for="category" class="form-label small fw-semibold text-secondary">Budget Category</label>
+              <select id="category" formControlName="category" class="form-select bg-light py-2" [attr.disabled]="isEditing ? true : null" required>
+                <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+              </select>
+            </div>
+
+            <!-- Amount Limit Input -->
+            <div class="mb-3">
+              <label for="amount" class="form-label small fw-semibold text-secondary">Monthly Limit (₹)</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light border-end-0 text-secondary"><i class="bi bi-currency-rupee"></i></span>
+                <input type="number" id="amount" formControlName="amount" placeholder="5000" class="form-control bg-light border-start-0 py-2" required>
+              </div>
+              <div *ngIf="budgetForm.get('amount')?.touched && budgetForm.get('amount')?.invalid" class="text-danger small mt-1">
+                <span *ngIf="budgetForm.get('amount')?.errors?.['required']">Budget limit amount is required.</span>
+                <span *ngIf="budgetForm.get('amount')?.errors?.['min']">Limit must be greater than 0.</span>
+              </div>
+            </div>
+
+            <!-- Month (Disabled when editing) -->
+            <div class="mb-4">
+              <label for="month" class="form-label small fw-semibold text-secondary">Target Month</label>
+              <input type="month" id="month" formControlName="month" class="form-control bg-light py-2" [attr.readonly]="isEditing ? true : null" required>
+            </div>
+
+            <!-- Actions -->
+            <div class="d-flex justify-content-end gap-2 border-top pt-3">
+              <button (click)="closeModal()" type="button" class="btn btn-outline-secondary px-4 py-2 rounded-3 fw-semibold">Cancel</button>
+              <button type="submit" class="btn btn-primary px-4 py-2 rounded-3 fw-semibold">
+                {{ isEditing ? 'Save Changes' : 'Set Budget' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

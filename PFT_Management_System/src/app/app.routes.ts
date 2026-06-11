@@ -26,6 +26,10 @@ export const routes: Routes = [
             {
                 path: 'transactions',
                 loadComponent: () => import('./non-auth/pages/transaction/transaction').then(c => c.Transaction)
+            },
+            {
+                path: 'budget',
+                loadComponent: () => import('./non-auth/pages/budget/budget').then(c => c.BudgetComponent)
             }
         ]
     },
