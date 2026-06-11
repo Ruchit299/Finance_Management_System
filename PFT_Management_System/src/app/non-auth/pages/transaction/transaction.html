@@ -1,0 +1,228 @@
+<!-- Header Section -->
+<div class="row align-items-center justify-content-between mb-4 g-3">
+  <div class="col-12 col-md-6">
+    <h1 class="h2 fw-bold text-dark mb-1">Transaction Management</h1>
+    <p class="text-secondary mb-0">Record, edit, and track your daily financial transactions.</p>
+  </div>
+  <div class="col-12 col-md-6 text-md-end">
+    <button (click)="openAddModal()" class="btn btn-primary btn-lg rounded-pill px-4 fw-semibold shadow-sm">
+      <i class="bi bi-plus-lg me-2"></i>Add Transaction
+    </button>
+  </div>
+</div>
+
+<!-- Filters Card -->
+<div class="card border-0 shadow-sm rounded-3 p-4 mb-4">
+  <h5 class="fw-bold text-dark mb-3"><i class="bi bi-funnel me-2"></i>Search & Filter</h5>
+  <div class="row g-3">
+    <!-- Start Date -->
+    <div class="col-6 col-md-3 col-lg-2">
+      <label class="form-label small fw-semibold text-secondary">Start Date</label>
+      <input type="date" [(ngModel)]="filters.startDate" class="form-control bg-light py-2">
+    </div>
+    
+    <!-- End Date -->
+    <div class="col-6 col-md-3 col-lg-2">
+      <label class="form-label small fw-semibold text-secondary">End Date</label>
+      <input type="date" [(ngModel)]="filters.endDate" class="form-control bg-light py-2">
+    </div>
+
+    <!-- Category -->
+    <div class="col-6 col-md-3 col-lg-2">
+      <label class="form-label small fw-semibold text-secondary">Category</label>
+      <select [(ngModel)]="filters.category" class="form-select bg-light py-2">
+        <option value="">All Categories</option>
+        <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+      </select>
+    </div>
+
+    <!-- Type -->
+    <div class="col-6 col-md-3 col-lg-2">
+      <label class="form-label small fw-semibold text-secondary">Type</label>
+      <select [(ngModel)]="filters.type" class="form-select bg-light py-2">
+        <option value="">All Types</option>
+        <option value="income">Income</option>
+        <option value="expense">Expense</option>
+      </select>
+    </div>
+
+    <!-- Min Amount -->
+    <div class="col-6 col-md-3 col-lg-2">
+      <label class="form-label small fw-semibold text-secondary">Min Amount</label>
+      <input type="number" [(ngModel)]="filters.minAmount" placeholder="₹ Min" class="form-control bg-light py-2">
+    </div>
+
+    <!-- Max Amount -->
+    <div class="col-6 col-md-3 col-lg-2">
+      <label class="form-label small fw-semibold text-secondary">Max Amount</label>
+      <input type="number" [(ngModel)]="filters.maxAmount" placeholder="₹ Max" class="form-control bg-light py-2">
+    </div>
+
+    <!-- Filter Actions -->
+    <div class="col-12 d-flex justify-content-end gap-2 mt-4">
+      <button (click)="resetFilters()" class="btn btn-outline-secondary px-4 py-2 rounded-3 fw-semibold">Reset</button>
+      <button (click)="applyFilters()" class="btn btn-primary px-4 py-2 rounded-3 fw-semibold">Apply Filters</button>
+    </div>
+  </div>
+</div>
+
+<!-- Transactions Table List -->
+<div class="card border-0 shadow-sm rounded-3 p-4">
+  <div *ngIf="isLoading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="text-secondary mt-2 small">Retrieving transactions...</p>
+  </div>
+
+  <div *ngIf="!isLoading && transactions.length === 0" class="text-center py-5">
+    <i class="bi bi-journal-x fs-1 text-secondary opacity-50"></i>
+    <h5 class="fw-bold text-dark mt-3">No Transactions Found</h5>
+    <p class="text-secondary small mb-0">Try adjusting your filters or add a new transaction to begin.</p>
+  </div>
+
+  <div class="table-responsive" *ngIf="!isLoading && transactions.length > 0">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th class="border-0 rounded-start text-secondary small fw-semibold">Date</th>
+          <th class="border-0 text-secondary small fw-semibold">Category</th>
+          <th class="border-0 text-secondary small fw-semibold">Notes / Description</th>
+          <th class="border-0 text-secondary small fw-semibold text-end">Amount</th>
+          <th class="border-0 text-secondary small fw-semibold text-center">Type</th>
+          <th class="border-0 rounded-end text-secondary small fw-semibold text-center">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let tx of transactions">
+          <!-- Date -->
+          <td class="small text-secondary fw-medium">{{ tx.date | date:'mediumDate' }}</td>
+          
+          <!-- Category -->
+          <td>
+            <span class="badge bg-light text-dark border rounded-pill px-2.5 py-1.5 small fw-medium">
+              {{ tx.category }}
+            </span>
+          </td>
+          
+          <!-- Notes -->
+          <td class="fw-medium text-dark">{{ tx.notes || '-' }}</td>
+          
+          <!-- Amount -->
+          <td class="fw-bold text-end" [ngClass]="tx.type === 'income' ? 'text-success' : 'text-danger'">
+            {{ tx.type === 'income' ? '+' : '-' }}₹{{ tx.amount | number:'1.2-2' }}
+          </td>
+          
+          <!-- Type -->
+          <td class="text-center">
+            <span class="badge px-2.5 py-1.5 rounded-pill small fw-medium d-inline-flex align-items-center gap-1"
+                  [ngClass]="tx.type === 'income' ? 'bg-success-subtle text-success border border-success-subtle' : 'bg-danger-subtle text-danger border border-danger-subtle'">
+              <i class="bi" [ngClass]="tx.type === 'income' ? 'bi-arrow-up-right-circle-fill' : 'bi-arrow-down-left-circle-fill'"></i>
+              {{ tx.type === 'income' ? 'Income' : 'Expense' }}
+            </span>
+          </td>
+
+          <!-- Actions -->
+          <td class="text-center">
+            <div class="d-flex align-items-center justify-content-center gap-2">
+              <button (click)="openEditModal(tx)" class="btn btn-outline-secondary btn-sm p-2 rounded-3" title="Edit">
+                <i class="bi bi-pencil-square"></i>
+              </button>
+              <button (click)="deleteTransaction(tx.id)" class="btn btn-outline-danger btn-sm p-2 rounded-3" title="Delete">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Add/Edit Custom Modal Backdrop -->
+<div *ngIf="showFormModal" class="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-flex align-items-center justify-content-center z-3">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+        <div class="card border-0 shadow-lg rounded-4 p-4">
+          <!-- Modal Header -->
+          <div class="d-flex align-items-center justify-content-between mb-4 border-bottom pb-2">
+            <h4 class="fw-bold text-dark mb-0">{{ isEditing ? 'Edit Transaction' : 'Add Transaction' }}</h4>
+            <button (click)="closeModal()" class="btn-close shadow-none" type="button" aria-label="Close"></button>
+          </div>
+
+          <!-- Alert Messages -->
+          <div *ngIf="errorMessage" class="alert alert-danger py-2 small mb-3" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ errorMessage }}
+          </div>
+          <div *ngIf="successMessage" class="alert alert-success py-2 small mb-3" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>{{ successMessage }}
+          </div>
+
+          <!-- Modal Body / Form -->
+          <form [formGroup]="transactionForm" (ngSubmit)="saveTransaction()">
+            <!-- Type Selector -->
+            <div class="mb-3">
+              <label class="form-label small fw-semibold text-secondary">Transaction Type</label>
+              <div class="row g-2">
+                <div class="col-6">
+                  <input type="radio" class="btn-check" id="typeExpense" value="expense" formControlName="type">
+                  <label class="btn btn-outline-danger w-100 py-2.5 rounded-3 fw-semibold d-flex align-items-center justify-content-center gap-2" for="typeExpense">
+                    <i class="bi bi-arrow-down-left-circle"></i> Expense
+                  </label>
+                </div>
+                <div class="col-6">
+                  <input type="radio" class="btn-check" id="typeIncome" value="income" formControlName="type">
+                  <label class="btn btn-outline-success w-100 py-2.5 rounded-3 fw-semibold d-flex align-items-center justify-content-center gap-2" for="typeIncome">
+                    <i class="bi bi-arrow-up-right-circle"></i> Income
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Amount Input -->
+            <div class="mb-3">
+              <label for="amount" class="form-label small fw-semibold text-secondary">Amount (₹)</label>
+              <div class="input-group">
+                <span class="input-group-text bg-light border-end-0 text-secondary"><i class="bi bi-currency-rupee"></i></span>
+                <input type="number" id="amount" formControlName="amount" placeholder="0.00" class="form-control bg-light border-start-0 py-2" required>
+              </div>
+              <div *ngIf="transactionForm.get('amount')?.touched && transactionForm.get('amount')?.invalid" class="text-danger small mt-1">
+                <span *ngIf="transactionForm.get('amount')?.errors?.['required']">Amount is required.</span>
+                <span *ngIf="transactionForm.get('amount')?.errors?.['min']">Amount must be greater than 0.</span>
+              </div>
+            </div>
+
+            <!-- Category -->
+            <div class="mb-3">
+              <label for="category" class="form-label small fw-semibold text-secondary">Category</label>
+              <select id="category" formControlName="category" class="form-select bg-light py-2" required>
+                <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+              </select>
+            </div>
+
+            <!-- Date -->
+            <div class="mb-3">
+              <label for="date" class="form-label small fw-semibold text-secondary">Date</label>
+              <input type="date" id="date" formControlName="date" class="form-control bg-light py-2" required>
+            </div>
+
+            <!-- Notes -->
+            <div class="mb-4">
+              <label for="notes" class="form-label small fw-semibold text-secondary">Notes / Description</label>
+              <textarea id="notes" formControlName="notes" placeholder="Add additional details..." class="form-control bg-light py-2" rows="2"></textarea>
+            </div>
+
+            <!-- Actions -->
+            <div class="d-flex justify-content-end gap-2 border-top pt-3">
+              <button (click)="closeModal()" type="button" class="btn btn-outline-secondary px-4 py-2 rounded-3 fw-semibold">Cancel</button>
+              <button type="submit" class="btn btn-primary px-4 py-2 rounded-3 fw-semibold">
+                {{ isEditing ? 'Save Changes' : 'Add Transaction' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

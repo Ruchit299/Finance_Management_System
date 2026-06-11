@@ -22,6 +22,10 @@ export const routes: Routes = [
             {
                 path: 'dashboard',
                 loadComponent: () => import('./non-auth/pages/dashboard/dashboard').then(c => c.Dashboard)
+            },
+            {
+                path: 'transactions',
+                loadComponent: () => import('./non-auth/pages/transaction/transaction').then(c => c.Transaction)
             }
         ]
     },
