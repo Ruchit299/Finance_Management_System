@@ -11,10 +11,9 @@ interface ValidationResult<T> {
 }
 
 class CreateBudgetDto {
-  @IsIn(["Food", "Transport", "Rent", "Shopping", "Entertainment", "Salary", "Investment"], {
-    message: "Invalid category choice",
-  })
-  category!: "Food" | "Transport" | "Rent" | "Shopping" | "Entertainment" | "Salary" | "Investment";
+  @Type(() => Number)
+  @IsNumber({}, { message: "categoryId must be a valid number" })
+  categoryId!: number;
 
   @Type(() => Number)
   @IsNumber({}, { message: "Amount must be a valid number" })

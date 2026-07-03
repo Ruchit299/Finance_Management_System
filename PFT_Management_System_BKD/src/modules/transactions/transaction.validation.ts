@@ -19,10 +19,9 @@ class CreateTransactionDto {
   @IsIn(["income", "expense"], { message: "Type must be either 'income' or 'expense'" })
   type!: "income" | "expense";
 
-  @IsIn(["Food", "Transport", "Rent", "Shopping", "Entertainment", "Salary", "Investment"], {
-    message: "Invalid category choice",
-  })
-  category!: "Food" | "Transport" | "Rent" | "Shopping" | "Entertainment" | "Salary" | "Investment";
+  @Type(() => Number)
+  @IsNumber({}, { message: "categoryId must be a valid number" })
+  categoryId!: number;
 
   @IsDateString({}, { message: "Date must be a valid date string (YYYY-MM-DD)" })
   date!: string;
@@ -30,6 +29,10 @@ class CreateTransactionDto {
   @IsOptional()
   @IsString({ message: "Notes must be a string" })
   notes?: string;
+
+  @IsOptional()
+  @IsIn(["Cash", "UPI", "Online"], { message: "Payment method must be Cash, UPI or Online" })
+  paymentMethod?: "Cash" | "UPI" | "Online";
 }
 
 class UpdateTransactionDto {
@@ -44,10 +47,9 @@ class UpdateTransactionDto {
   type?: "income" | "expense";
 
   @IsOptional()
-  @IsIn(["Food", "Transport", "Rent", "Shopping", "Entertainment", "Salary", "Investment"], {
-    message: "Invalid category choice",
-  })
-  category?: "Food" | "Transport" | "Rent" | "Shopping" | "Entertainment" | "Salary" | "Investment";
+  @Type(() => Number)
+  @IsNumber({}, { message: "categoryId must be a valid number" })
+  categoryId?: number;
 
   @IsOptional()
   @IsDateString({}, { message: "Date must be a valid date string (YYYY-MM-DD)" })
@@ -56,6 +58,10 @@ class UpdateTransactionDto {
   @IsOptional()
   @IsString({ message: "Notes must be a string" })
   notes?: string;
+
+  @IsOptional()
+  @IsIn(["Cash", "UPI", "Online"], { message: "Payment method must be Cash, UPI or Online" })
+  paymentMethod?: "Cash" | "UPI" | "Online";
 }
 
 class FilterTransactionDto {
@@ -68,10 +74,9 @@ class FilterTransactionDto {
   endDate?: string;
 
   @IsOptional()
-  @IsIn(["Food", "Transport", "Rent", "Shopping", "Entertainment", "Salary", "Investment"], {
-    message: "Invalid category choice",
-  })
-  category?: "Food" | "Transport" | "Rent" | "Shopping" | "Entertainment" | "Salary" | "Investment";
+  @Type(() => Number)
+  @IsNumber({}, { message: "categoryId must be a valid number" })
+  categoryId?: number;
 
   @IsOptional()
   @IsIn(["income", "expense"], { message: "Type must be either 'income' or 'expense'" })
@@ -86,6 +91,10 @@ class FilterTransactionDto {
   @Type(() => Number)
   @IsNumber({}, { message: "Max amount must be a number" })
   maxAmount?: number;
+
+  @IsOptional()
+  @IsIn(["Cash", "UPI", "Online"], { message: "Payment method must be Cash, UPI or Online" })
+  paymentMethod?: "Cash" | "UPI" | "Online";
 }
 
 function validateDto<T extends object>(cls: new () => T, data: any): ValidationResult<T> {

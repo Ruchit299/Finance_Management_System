@@ -1,13 +1,14 @@
 import { sequelize } from "../../config/dbConnect.ts";
 import { DataTypes, Model } from "sequelize";
 import { User } from "../user/user.model.ts";
+import { Category } from "../category/category.model.ts";
 
 type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
 type BudgetAttributes = {
   id: number;
   userId: number;
-  category: "Food" | "Transport" | "Rent" | "Shopping" | "Entertainment" | "Salary" | "Investment";
+  categoryId: number;
   amount: number;
   month: string; // Format: YYYY-MM
   deleted: number;
@@ -22,7 +23,7 @@ type BudgetCreationAttributes = Optional<BudgetAttributes,
 class Budget extends Model<BudgetAttributes, BudgetCreationAttributes> implements BudgetAttributes {
   declare id: number;
   declare userId: number;
-  declare category: "Food" | "Transport" | "Rent" | "Shopping" | "Entertainment" | "Salary" | "Investment";
+  declare categoryId: number;
   declare amount: number;
   declare month: string;
   declare deleted: number;
@@ -48,9 +49,14 @@ Budget.init(
         key: "id",
       },
     },
-    category: {
-      type: DataTypes.ENUM("Food", "Transport", "Rent", "Shopping", "Entertainment", "Salary", "Investment"),
+    categoryId: {
+      type: DataTypes.INTEGER,
       allowNull: false,
+      field: "category_id",
+      references: {
+        model: Category,
+        key: "id",
+      },
     },
     amount: {
       type: DataTypes.DECIMAL(10, 2),
@@ -89,7 +95,7 @@ Budget.init(
     indexes: [
       {
         unique: true,
-        fields: ["user_id", "category", "month", "deleted"],
+        fields: ["user_id", "category_id", "month", "deleted"],
       },
     ],
   }
@@ -98,6 +104,8 @@ Budget.init(
 // Associations
 User.hasMany(Budget, { foreignKey: "userId" });
 Budget.belongsTo(User, { foreignKey: "userId" });
+Category.hasMany(Budget, { foreignKey: "categoryId" });
+Budget.belongsTo(Category, { foreignKey: "categoryId" });
 
 export { Budget };
 export type { BudgetAttributes };

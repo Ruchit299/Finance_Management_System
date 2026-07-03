@@ -11,7 +11,7 @@ const DB_HOST: string = process.env.DB_HOST ?? 'localhost';
 const sequelize = new Sequelize(DB_NAME, DB_USERNAME, DB_PASSWORD, {
   host: DB_HOST,
   dialect: DB_DIALECT,
-  logging: true,
+  logging: false,
   dialectOptions: {
     connectTimeout: 60000
   },

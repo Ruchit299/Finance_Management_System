@@ -1,0 +1,122 @@
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="h3 mb-0 text-gray-800 fw-bold">
+            <i class="bi bi-tags text-primary me-2"></i>Categories
+        </h2>
+    </div>
+
+    <div *ngIf="errorMessage" class="alert alert-danger shadow-sm border-0 rounded-3" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ errorMessage }}
+    </div>
+    <div *ngIf="successMessage" class="alert alert-success shadow-sm border-0 rounded-3" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>{{ successMessage }}
+    </div>
+
+    <div class="row">
+        <!-- Category Form -->
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+                <div class="card-header bg-white border-0 pt-4 pb-0 px-4">
+                    <h5 class="card-title fw-bold mb-0 text-primary">
+                        <i class="bi" [ngClass]="isEditing ? 'bi-pencil-square' : 'bi-plus-circle'"></i>
+                        {{ isEditing ? 'Edit Category' : 'Add New Category' }}
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <form (ngSubmit)="saveCategory()">
+                        <div class="mb-4">
+                            <label class="form-label text-secondary small text-uppercase fw-bold">Category Name</label>
+                            <div class="input-group input-group-lg">
+                                <span class="input-group-text bg-light border-end-0 text-secondary">
+                                    <i class="bi bi-tag"></i>
+                                </span>
+                                <input type="text" class="form-control bg-light border-start-0 ps-0"
+                                    [(ngModel)]="newCategoryName" name="name" placeholder="e.g. Utility" required>
+                            </div>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit"
+                                class="btn btn-primary flex-grow-1 rounded-pill py-2 fw-bold shadow-sm"
+                                [disabled]="!newCategoryName.trim() || isLoading">
+                                <i class="bi" [ngClass]="isEditing ? 'bi-check-lg' : 'bi-plus-lg'"></i>
+                                {{ isLoading ? 'Saving...' : (isEditing ? 'Update Category' : 'Add Category') }}
+                            </button>
+                            <button *ngIf="isEditing" type="button"
+                                class="btn btn-light border rounded-pill py-2 fw-bold" (click)="resetForm()">
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Category List -->
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0 rounded-4 overflow-hidden h-100">
+                <div
+                    class="card-header bg-white border-bottom py-3 px-4 d-flex justify-content-between align-items-center">
+                    <h5 class="card-title fw-bold mb-0 text-dark">Category List</h5>
+                    <span class="badge bg-primary rounded-pill px-3 py-2 shadow-sm">{{ categories.length }} Total</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4 py-3 text-secondary text-uppercase fw-bold small border-0">Name</th>
+                                    <th class="py-3 text-secondary text-uppercase fw-bold small border-0">Type</th>
+                                    <th class="pe-4 py-3 text-secondary text-uppercase fw-bold small border-0 text-end">
+                                        Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngIf="categories.length === 0 && !isLoading">
+                                    <td colspan="3" class="text-center py-5 text-muted">
+                                        <div class="d-flex flex-column align-items-center">
+                                            <i class="bi bi-inbox fs-1 mb-2 text-secondary opacity-50"></i>
+                                            <p class="mb-0">No categories found.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr *ngFor="let cat of categories">
+                                    <td class="ps-4 py-3 fw-medium text-dark">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="rounded-circle bg-light d-flex align-items-center justify-content-center"
+                                                style="width: 32px; height: 32px;">
+                                                <i class="bi bi-tag text-secondary small"></i>
+                                            </div>
+                                            {{ cat.name }}
+                                        </div>
+                                    </td>
+                                    <td class="py-3">
+                                        <span class="badge rounded-pill px-3 py-2 fw-medium"
+                                            [ngClass]="cat.userId ? 'bg-primary bg-opacity-10 text-primary border border-primary-subtle' : 'bg-secondary bg-opacity-10 text-secondary border border-secondary-subtle'">
+                                            <i class="bi me-1"
+                                                [ngClass]="cat.userId ? 'bi-person' : 'bi-shield-lock'"></i>
+                                            {{ cat.userId ? 'Custom' : 'System Default' }}
+                                        </span>
+                                    </td>
+                                    <td class="pe-4 py-3 text-end">
+                                        <div class="btn-group shadow-sm" role="group" *ngIf="cat.userId">
+                                            <button type="button" class="btn btn-sm btn-outline-primary"
+                                                (click)="editCategory(cat)" title="Edit">
+                                                <i class="bi bi-pencil-square"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-outline-danger"
+                                                (click)="deleteCategory(cat)" title="Delete">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </div>
+                                        <span *ngIf="!cat.userId" class="text-muted small fst-italic">Read-only</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -2,6 +2,7 @@ import { Op } from "sequelize";
 import type { Request, Response } from "express";
 import { Budget } from "./budget.model.ts";
 import { Transaction } from "../transactions/transaction.model.ts";
+import { Category } from "../category/category.model.ts";
 import { validateCreateBudget, validateUpdateBudget } from "./budget.validation.ts";
 import ResponseBuilder from "../../helper/responce-builder/responseBuilder.ts";
 
@@ -17,11 +18,11 @@ export const createBudget = async (req: Request, res: Response): Promise<Respons
     return ResponseBuilder.error(res, 401, "User is not authenticated");
   }
 
-  const { category, amount, month } = validatedData!;
+  const { categoryId, amount, month } = validatedData!;
 
   try {
     const existingBudget = await Budget.findOne({
-      where: { userId, category, month, deleted: 0 },
+      where: { userId, categoryId, month, deleted: 0 },
     });
 
     if (existingBudget) {
@@ -30,13 +31,17 @@ export const createBudget = async (req: Request, res: Response): Promise<Respons
 
     const budget = await Budget.create({
       userId,
-      category,
+      categoryId,
       amount,
       month,
       deleted: 0,
     });
 
-    return ResponseBuilder.success(res, 201, "Budget created successfully", budget);
+    await budget.reload({
+      include: [{ model: Category, attributes: ["id", "name"] }],
+    });
+
+    return ResponseBuilder.success(res, 201, "Budget created successfully", budget.toJSON());
   } catch (err: any) {
     return ResponseBuilder.error(res, 500, "Server error", err.message || String(err));
   }
@@ -72,7 +77,11 @@ export const updateBudget = async (req: Request, res: Response): Promise<Respons
       amount: validatedData!.amount,
     });
 
-    return ResponseBuilder.success(res, 200, "Budget updated successfully", budget);
+    await budget.reload({
+      include: [{ model: Category, attributes: ["id", "name"] }],
+    });
+
+    return ResponseBuilder.success(res, 200, "Budget updated successfully", budget.toJSON());
   } catch (err: any) {
     return ResponseBuilder.error(res, 500, "Server error", err.message || String(err));
   }
@@ -128,33 +137,41 @@ export const getBudgets = async (req: Request, res: Response): Promise<Response 
     // 1. Fetch all active budgets for the user in the given month
     const budgets = await Budget.findAll({
       where: { userId, month, deleted: 0 },
+      include: [{ model: Category, attributes: ["id", "name"] }],
     });
 
     // 2. Fetch all expense transactions for the user in the given month to calculate spent sums
+    const [yStr, mStr] = month.split("-");
+    const yearNum = Number(yStr);
+    const monthNum = Number(mStr) - 1;
+    const startOfMonth = new Date(Date.UTC(yearNum, monthNum, 1)).toISOString().split("T")[0];
+    const endOfMonth = new Date(Date.UTC(yearNum, monthNum + 1, 0)).toISOString().split("T")[0];
+
     const transactions = await Transaction.findAll({
       where: {
         userId,
         type: "expense",
         deleted: 0,
         date: {
-          [Op.like]: `${month}-%`,
+          [Op.between]: [startOfMonth, endOfMonth],
         },
       },
     });
 
-    // 3. Aggregate spending by category
-    const categorySpending: { [key: string]: number } = {};
+    // 3. Aggregate spending by categoryId
+    const categorySpending: { [key: number]: number } = {};
     transactions.forEach((tx) => {
-      categorySpending[tx.category] = (categorySpending[tx.category] || 0) + Number(tx.amount);
+      categorySpending[tx.categoryId] = (categorySpending[tx.categoryId] || 0) + Number(tx.amount);
     });
 
     // 4. Map budgets to include utilization details
     const result = budgets.map((b) => {
-      const spent = categorySpending[b.category] || 0;
+      const spent = categorySpending[b.categoryId] || 0;
       const percent = b.amount > 0 ? Number(((spent / b.amount) * 100).toFixed(1)) : 0;
       return {
         id: b.id,
-        category: b.category,
+        categoryId: b.categoryId,
+        Category: (b as any).Category,
         amount: Number(b.amount),
         month: b.month,
         spent,

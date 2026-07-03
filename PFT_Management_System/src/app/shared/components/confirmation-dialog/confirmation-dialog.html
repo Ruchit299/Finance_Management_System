@@ -1,0 +1,28 @@
+<div class="modal fade" tabindex="-1" [ngClass]="{'show d-block': isVisible}" 
+     [style.background-color]="isVisible ? 'rgba(0,0,0,0.5)' : 'transparent'"
+     [style.pointer-events]="isVisible ? 'auto' : 'none'"
+     role="dialog" aria-modal="true" *ngIf="options || isVisible">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content shadow">
+      <div class="modal-header border-bottom-0 pb-0">
+        <h5 class="modal-title fs-5 fw-bold" [ngClass]="options?.isConfirm ? 'text-primary' : 'text-danger'">
+          {{ options?.title }}
+        </h5>
+        <button type="button" class="btn-close" aria-label="Close" (click)="close(false)"></button>
+      </div>
+      <div class="modal-body py-4">
+        <p class="mb-0 fs-6 text-secondary" style="white-space: pre-line;">{{ options?.message }}</p>
+      </div>
+      <div class="modal-footer border-top-0 pt-0">
+        <button *ngIf="options?.isConfirm" type="button" class="btn btn-light rounded-pill px-4" (click)="close(false)">
+          {{ options?.cancelText || 'Cancel' }}
+        </button>
+        <button type="button" class="btn rounded-pill px-4" 
+                [ngClass]="options?.isConfirm ? 'btn-primary' : 'btn-danger'" 
+                (click)="close(true)">
+          {{ options?.confirmText || 'OK' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

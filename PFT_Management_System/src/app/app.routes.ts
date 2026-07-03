@@ -30,6 +30,22 @@ export const routes: Routes = [
             {
                 path: 'budget',
                 loadComponent: () => import('./non-auth/pages/budget/budget').then(c => c.BudgetComponent)
+            },
+            {
+                path: 'savings-goals',
+                loadComponent: () => import('./non-auth/pages/savings-goals/savings-goals').then(c => c.SavingsGoalsComponent)
+            },
+            {
+                path: 'recurring-transactions',
+                loadComponent: () => import('./non-auth/pages/recurring-transactions/recurring-transactions').then(c => c.RecurringTransactionsComponent)
+            },
+            {
+                path: 'bill-reminders',
+                loadComponent: () => import('./non-auth/pages/bill-reminders/bill-reminders').then(c => c.BillRemindersComponent)
+            },
+            {
+                path: 'categories',
+                loadComponent: () => import('./non-auth/pages/category-master/category-master').then(c => c.CategoryMasterComponent)
             }
         ]
     },
@@ -38,3 +54,4 @@ export const routes: Routes = [
         redirectTo: 'login'
     }
 ];
+

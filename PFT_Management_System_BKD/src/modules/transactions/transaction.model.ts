@@ -1,6 +1,7 @@
 import { sequelize } from "../../config/dbConnect.ts";
 import { DataTypes, Model } from "sequelize";
 import { User } from "../user/user.model.ts";
+import { Category } from "../category/category.model.ts";
 
 type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
@@ -9,7 +10,9 @@ type TransactionAttributes = {
   userId: number;
   amount: number;
   type: "income" | "expense";
-  category: "Food" | "Transport" | "Rent" | "Shopping" | "Entertainment" | "Salary" | "Investment";
+  categoryId: number;
+  paymentMethod: "Cash" | "UPI" | "Online";
+  recurringTransactionId: number | null;
   date: Date;
   notes: string | null;
   deleted: number;
@@ -19,14 +22,16 @@ type TransactionAttributes = {
 };
 
 type TransactionCreationAttributes = Optional<TransactionAttributes,
-  "id" | "deleted" | "createdAt" | "updatedAt" | "deletedAt" | "notes">;
+  "id" | "deleted" | "createdAt" | "updatedAt" | "deletedAt" | "notes" | "recurringTransactionId" | "paymentMethod">;
 
 class Transaction extends Model<TransactionAttributes, TransactionCreationAttributes> implements TransactionAttributes {
   declare id: number;
   declare userId: number;
   declare amount: number;
   declare type: "income" | "expense";
-  declare category: "Food" | "Transport" | "Rent" | "Shopping" | "Entertainment" | "Salary" | "Investment";
+  declare categoryId: number;
+  declare paymentMethod: "Cash" | "UPI" | "Online";
+  declare recurringTransactionId: number | null;
   declare date: Date;
   declare notes: string | null;
   declare deleted: number;
@@ -60,9 +65,25 @@ Transaction.init(
       type: DataTypes.ENUM("income", "expense"),
       allowNull: false,
     },
-    category: {
-      type: DataTypes.ENUM("Food", "Transport", "Rent", "Shopping", "Entertainment", "Salary", "Investment"),
+    paymentMethod: {
+      type: DataTypes.ENUM("Cash", "UPI", "Online"),
       allowNull: false,
+      defaultValue: "Cash",
+      field: "payment_method",
+    },
+    categoryId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      field: "category_id",
+      references: {
+        model: Category,
+        key: "id",
+      },
+    },
+    recurringTransactionId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      field: "recurring_transaction_id",
     },
     date: {
       type: DataTypes.DATEONLY,
@@ -105,6 +126,8 @@ Transaction.init(
 // Associations
 User.hasMany(Transaction, { foreignKey: "userId" });
 Transaction.belongsTo(User, { foreignKey: "userId" });
+Category.hasMany(Transaction, { foreignKey: "categoryId" });
+Transaction.belongsTo(Category, { foreignKey: "categoryId" });
 
 export { Transaction };
 export type { TransactionAttributes };

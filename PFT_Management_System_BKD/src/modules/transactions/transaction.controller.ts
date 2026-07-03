@@ -1,6 +1,7 @@
 import { Op } from "sequelize";
 import type { Request, Response } from "express";
 import { Transaction } from "./transaction.model.ts";
+import { Category } from "../category/category.model.ts";
 import {
   validateCreateTransaction,
   validateUpdateTransaction,
@@ -25,13 +26,18 @@ export const createTransaction = async (req: Request, res: Response): Promise<Re
       userId,
       amount: validatedData!.amount,
       type: validatedData!.type,
-      category: validatedData!.category,
+      categoryId: validatedData!.categoryId,
+      paymentMethod: validatedData!.paymentMethod || "Cash",
       date: new Date(validatedData!.date),
       notes: validatedData!.notes || null,
       deleted: 0,
     });
 
-    return ResponseBuilder.success(res, 201, "Transaction created successfully", transaction);
+    await transaction.reload({
+      include: [{ model: Category, attributes: ["id", "name"] }],
+    });
+
+    return ResponseBuilder.success(res, 201, "Transaction created successfully", transaction.toJSON());
   } catch (err: any) {
     return ResponseBuilder.error(res, 500, "Server error", err.message || String(err));
   }
@@ -66,12 +72,17 @@ export const updateTransaction = async (req: Request, res: Response): Promise<Re
     await transaction.update({
       amount: validatedData?.amount !== undefined ? validatedData.amount : transaction.amount,
       type: validatedData?.type !== undefined ? validatedData.type : transaction.type,
-      category: validatedData?.category !== undefined ? validatedData.category : transaction.category,
+      categoryId: validatedData?.categoryId !== undefined ? validatedData.categoryId : transaction.categoryId,
+      paymentMethod: validatedData?.paymentMethod !== undefined ? validatedData.paymentMethod : transaction.paymentMethod,
       date: validatedData?.date !== undefined ? new Date(validatedData.date) : transaction.date,
       notes: validatedData?.notes !== undefined ? (validatedData.notes || null) : transaction.notes,
     });
 
-    return ResponseBuilder.success(res, 200, "Transaction updated successfully", transaction);
+    await transaction.reload({
+      include: [{ model: Category, attributes: ["id", "name"] }],
+    });
+
+    return ResponseBuilder.success(res, 200, "Transaction updated successfully", transaction.toJSON());
   } catch (err: any) {
     return ResponseBuilder.error(res, 500, "Server error", err.message || String(err));
   }
@@ -139,15 +150,20 @@ export const getTransactions = async (req: Request, res: Response): Promise<Resp
     }
 
     // Category filter
-    if (validatedData?.category) {
-      whereClause.category = validatedData.category;
+    if (validatedData?.categoryId) {
+      whereClause.categoryId = validatedData.categoryId;
     }
-
+ 
     // Type filter
     if (validatedData?.type) {
       whereClause.type = validatedData.type;
     }
 
+    // Payment Method filter
+    if (validatedData?.paymentMethod) {
+      whereClause.paymentMethod = validatedData.paymentMethod;
+    }
+ 
     // Amount range filter
     if (validatedData?.minAmount !== undefined || validatedData?.maxAmount !== undefined) {
       whereClause.amount = {};
@@ -158,12 +174,13 @@ export const getTransactions = async (req: Request, res: Response): Promise<Resp
         whereClause.amount[Op.lte] = validatedData.maxAmount;
       }
     }
-
+ 
     const transactions = await Transaction.findAll({
       where: whereClause,
+      include: [{ model: Category, attributes: ["id", "name"] }],
       order: [["date", "DESC"], ["createdAt", "DESC"]],
     });
-
+ 
     return ResponseBuilder.success(res, 200, "Transactions retrieved successfully", { result: transactions });;
   } catch (err: any) {
     return ResponseBuilder.error(res, 500, "Server error", err.message || String(err));

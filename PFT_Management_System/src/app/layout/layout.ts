@@ -10,4 +10,4 @@ import { Footer } from './footer/footer';
   imports: [CommonModule, RouterOutlet, Header, Footer],
   templateUrl: './layout.html',
 })
-export class LayoutComponent {}
+export class LayoutComponent { }

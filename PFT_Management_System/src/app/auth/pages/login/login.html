@@ -5,20 +5,22 @@
         <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
           <div class="row g-0">
             <!-- Left Info Panel (Hidden on mobile) -->
-            <div class="col-md-6 bg-primary bg-gradient d-none d-md-flex flex-column justify-content-between p-5 text-white">
+            <div
+              class="col-md-6 bg-primary bg-gradient d-none d-md-flex flex-column justify-content-between p-5 text-white">
               <div>
                 <div class="d-flex align-items-center mb-5">
                   <i class="bi bi-bank fs-2 me-2"></i>
                   <span class="fs-4 fw-bold">PFT Portal</span>
                 </div>
                 <h1 class="display-6 fw-bold mb-3">Finance Management System</h1>
-                <p class="lead opacity-75">Track expenses, plan budgets, and visualize your financial health in one single dashboard.</p>
+                <p class="lead opacity-75">Track expenses, plan budgets, and visualize your financial health in one
+                  single dashboard.</p>
               </div>
               <div>
-                <div class="d-flex align-items-center gap-2 opacity-75 small">
+                <!-- <div class="d-flex align-items-center gap-2 opacity-75 small">
                   <i class="bi bi-shield-check"></i>
                   <span>Secure 256-bit SSL encryption</span>
-                </div>
+                </div> -->
                 <hr class="opacity-25 my-3">
                 <p class="small mb-0 opacity-50">&copy; 2026 Personal Finance Tracker. All rights reserved.</p>
               </div>
@@ -36,29 +38,32 @@
               </div>
 
               <!-- Social Login Options -->
-              <div class="row g-2 mb-4">
+              <!-- <div class="row g-2 mb-4">
                 <div class="col-6">
-                  <button type="button" class="btn btn-outline-light border text-dark w-100 d-flex align-items-center justify-content-center py-2">
+                  <button type="button"
+                    class="btn btn-outline-light border text-dark w-100 d-flex align-items-center justify-content-center py-2">
                     <i class="bi bi-google me-2 text-danger"></i>
                     <span class="small fw-semibold">Google</span>
                   </button>
                 </div>
                 <div class="col-6">
-                  <button type="button" class="btn btn-outline-light border text-dark w-100 d-flex align-items-center justify-content-center py-2">
+                  <button type="button"
+                    class="btn btn-outline-light border text-dark w-100 d-flex align-items-center justify-content-center py-2">
                     <i class="bi bi-microsoft me-2 text-primary"></i>
                     <span class="small fw-semibold">Microsoft</span>
                   </button>
                 </div>
-              </div>
+              </div> -->
 
-              <div class="d-flex align-items-center mb-4">
+              <!-- <div class="d-flex align-items-center mb-4">
                 <hr class="flex-grow-1 text-muted my-0">
                 <span class="mx-3 text-muted small fw-medium">or continue with</span>
                 <hr class="flex-grow-1 text-muted my-0">
-              </div>
+              </div> -->
 
               <!-- Error Alert -->
-              <div *ngIf="errorMessage" class="alert alert-danger d-flex align-items-center mb-3 py-2 small" role="alert">
+              <div *ngIf="errorMessage" class="alert alert-danger d-flex align-items-center mb-3 py-2 small"
+                role="alert">
                 <i class="bi bi-exclamation-triangle-fill me-2"></i>
                 <div>{{ errorMessage }}</div>
               </div>
@@ -68,10 +73,13 @@
                 <div class="mb-3">
                   <label for="email" class="form-label small fw-semibold text-secondary">Email Address</label>
                   <div class="input-group">
-                    <span class="input-group-text bg-light border-end-0 text-secondary"><i class="bi bi-envelope"></i></span>
-                    <input type="email" id="email" formControlName="email" class="form-control bg-light border-start-0 py-2" placeholder="name@example.com" required>
+                    <span class="input-group-text bg-light border-end-0 text-secondary"><i
+                        class="bi bi-envelope"></i></span>
+                    <input type="email" id="email" formControlName="email"
+                      class="form-control bg-light border-start-0 py-2" placeholder="name@example.com" required>
                   </div>
-                  <div *ngIf="loginForm.get('email')?.touched && loginForm.get('email')?.invalid" class="text-danger small mt-1">
+                  <div *ngIf="loginForm.get('email')?.touched && loginForm.get('email')?.invalid"
+                    class="text-danger small mt-1">
                     <span *ngIf="loginForm.get('email')?.errors?.['required']">Email is required.</span>
                     <span *ngIf="loginForm.get('email')?.errors?.['email']">Please enter a valid email address.</span>
                   </div>
@@ -84,32 +92,38 @@
                     <a href="#" class="text-decoration-none small text-primary fw-semibold">Forgot Password?</a>
                   </div>
                   <div class="input-group">
-                    <span class="input-group-text bg-light border-end-0 text-secondary"><i class="bi bi-lock"></i></span>
-                    <input type="password" id="password" formControlName="password" class="form-control bg-light border-start-0 py-2" placeholder="••••••••" required>
+                    <span class="input-group-text bg-light border-end-0 text-secondary"><i
+                        class="bi bi-lock"></i></span>
+                    <input type="password" id="password" formControlName="password"
+                      class="form-control bg-light border-start-0 py-2" placeholder="••••••••" required>
                   </div>
-                  <div *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.invalid" class="text-danger small mt-1">
+                  <div *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.invalid"
+                    class="text-danger small mt-1">
                     <span *ngIf="loginForm.get('password')?.errors?.['required']">Password is required.</span>
-                    <span *ngIf="loginForm.get('password')?.errors?.['minlength']">Password must be at least 6 characters long.</span>
+                    <span *ngIf="loginForm.get('password')?.errors?.['minlength']">Password must be at least 6
+                      characters long.</span>
                   </div>
                 </div>
 
                 <!-- Remember Me Checkbox -->
-                <div class="mb-4">
+                <!-- <div class="mb-4">
                   <div class="form-check">
                     <input type="checkbox" class="form-check-input" id="rememberMe">
                     <label class="form-check-label small text-secondary" for="rememberMe">Remember me for 30 days</label>
                   </div>
-                </div>
+                </div> -->
 
                 <!-- Submit Button -->
-                <button type="submit" [disabled]="isLoading" class="btn btn-primary btn-lg w-100 py-2 fs-6 fw-semibold shadow-sm mb-3">
-                  <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                <button type="submit" [disabled]="isLoading"
+                  class="btn btn-primary btn-lg w-100 py-2 fs-6 fw-semibold shadow-sm mb-3">
+                  <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2" role="status"
+                    aria-hidden="true"></span>
                   <span>{{ isLoading ? 'Signing In...' : 'Sign In' }}</span>
                 </button>
 
                 <!-- Link to Register -->
                 <p class="text-center small text-secondary mb-0">
-                  Don't have an account? 
+                  Don't have an account?
                   <a routerLink="/register" class="text-decoration-none text-primary fw-semibold">Sign up for free</a>
                 </p>
               </form>

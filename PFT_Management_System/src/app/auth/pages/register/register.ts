@@ -27,7 +27,7 @@ export class Register {
       email: ['', [Validators.required, Validators.email, Validators.maxLength(50)]],
       contact: ['', [Validators.pattern('^[0-9]{10,12}$')]],
       password: ['', [Validators.required, Validators.minLength(6)]],
-      terms: [false, [Validators.requiredTrue]]
+      // terms: [false, [Validators.requiredTrue]]
     });
   }
 
