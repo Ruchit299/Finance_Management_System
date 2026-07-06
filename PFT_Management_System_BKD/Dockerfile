@@ -22,6 +22,8 @@ WORKDIR /usr/src/app
 
 # Set Node environment to production
 ENV NODE_ENV=production
+# Render automatically sets the PORT environment variable. We read it or default to 8086.
+ENV PORT=8086
 
 # Copy package configurations
 COPY package*.json ./
@@ -31,11 +33,12 @@ RUN npm ci --only=production
 
 # Copy compiled JavaScript from builder stage
 COPY --from=builder /usr/src/app/dist ./dist
-# Copy raw source files if they are needed or if dependencies expect them, but typically only dist is needed.
-# Since we have "type": "module" and start command runs node dist/app/index.js, we just need package.json and dist.
 
-# Expose port (must match PORT in .env, default 8086)
+# Use a non-root unprivileged user for security
+USER node
+
+# Expose port (Render ignores EXPOSE but it serves as good documentation)
 EXPOSE 8086
 
-# Start the application
+# Start the application using node directly
 CMD ["node", "dist/app/index.js"]
