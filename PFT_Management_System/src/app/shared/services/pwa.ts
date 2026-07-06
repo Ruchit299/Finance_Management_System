@@ -13,19 +13,28 @@ export class PwaService {
   }
 
   private initInstallPromptListener() {
-    window.addEventListener('beforeinstallprompt', (e) => {
-      // Prevent the mini-infobar from appearing on mobile
-      e.preventDefault();
-      // Stash the event so it can be triggered later.
+    // Check if the event was already captured in index.html before Angular bootstrapped
+    const cachedPrompt = (window as any).deferredPrompt;
+    if (cachedPrompt) {
+      this.deferredPrompt = cachedPrompt;
+      this.showInstallButton.set(true);
+    }
+
+    // Set up callback in case index.html captures the event during/after Angular initialization
+    (window as any).onBeforeInstallPrompt = (e: any) => {
       this.deferredPrompt = e;
-      // Update UI signal to show the install button
+      this.showInstallButton.set(true);
+    };
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      this.deferredPrompt = e;
       this.showInstallButton.set(true);
     });
 
     window.addEventListener('appinstalled', () => {
-      // Clear the deferredPrompt
       this.deferredPrompt = null;
-      // Hide the install button
+      (window as any).deferredPrompt = null;
       this.showInstallButton.set(false);
       console.log('PFT Portal app was successfully installed.');
     });
