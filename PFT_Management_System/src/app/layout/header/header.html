@@ -72,6 +72,14 @@
             </ul>
 
 
+            <!-- Install PWA Button -->
+            <div class="navbar-nav align-items-lg-center" *ngIf="showInstallButton">
+                <button (click)="installApp()" class="btn btn-primary d-flex align-items-center gap-2 me-lg-3 my-2 my-lg-0 py-2 px-3 rounded-3 shadow-sm">
+                    <i class="bi bi-download"></i>
+                    <span>Install App</span>
+                </button>
+            </div>
+
             <!-- User Profile Dropdown -->
             <div class="navbar-nav align-items-lg-center">
                 <div class="nav-item dropdown w-100 w-lg-auto">

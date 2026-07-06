@@ -2,6 +2,7 @@ import { Component, OnInit, HostListener } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../auth/services/auth.service';
+import { PwaService } from '../../shared/services/pwa';
 
 @Component({
   selector: 'app-header',
@@ -14,7 +15,11 @@ export class Header implements OnInit {
   isMenuCollapsed = true;
   isDropdownOpen = false;
 
-  constructor(private authService: AuthService, private router: Router) { }
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+    private pwaService: PwaService
+  ) { }
 
   ngOnInit(): void {
     this.user = this.authService.getUser();
@@ -39,5 +44,13 @@ export class Header implements OnInit {
     this.isMenuCollapsed = true;
     this.authService.logout();
     this.router.navigate(['/login']);
+  }
+
+  get showInstallButton(): boolean {
+    return this.pwaService.showInstallButton();
+  }
+
+  installApp(): void {
+    this.pwaService.installApp();
   }
 }
