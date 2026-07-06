@@ -50,7 +50,7 @@ export const processRecurringTransactions = async (): Promise<void> => {
           categoryId: item.categoryId,
           paymentMethod: item.paymentMethod,
           recurringTransactionId: item.id,
-          date: currentDueDate,
+          date: new Date(currentDueDate),
           notes: item.notes ? `${item.notes} (Recurring)` : `Recurring ${item.type}`,
           deleted: 0,
         });

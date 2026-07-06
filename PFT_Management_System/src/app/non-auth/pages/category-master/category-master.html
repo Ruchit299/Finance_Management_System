@@ -5,6 +5,26 @@
         </h2>
     </div>
 
+    <!-- Tab Controls -->
+    <ul class="nav nav-pills mb-4 gap-2">
+        <li class="nav-item">
+            <button class="btn px-4 py-2 rounded-pill fw-semibold shadow-sm"
+                [class.btn-primary]="selectedTab === 'transaction'"
+                [class.btn-light]="selectedTab !== 'transaction'"
+                (click)="selectTab('transaction')">
+                <i class="bi bi-wallet2 me-1"></i> Transaction Categories
+            </button>
+        </li>
+        <li class="nav-item">
+            <button class="btn px-4 py-2 rounded-pill fw-semibold shadow-sm"
+                [class.btn-primary]="selectedTab === 'investment'"
+                [class.btn-light]="selectedTab !== 'investment'"
+                (click)="selectTab('investment')">
+                <i class="bi bi-graph-up-arrow me-1"></i> Investment Categories
+            </button>
+        </li>
+    </ul>
+
     <div *ngIf="errorMessage" class="alert alert-danger shadow-sm border-0 rounded-3" role="alert">
         <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ errorMessage }}
     </div>

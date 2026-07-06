@@ -3,6 +3,7 @@ import type { Request, Response } from "express";
 import { Transaction } from "../transactions/transaction.model.ts";
 import { Budget } from "../budget/budget.model.ts";
 import { SavingsGoal } from "../savings-goals/savings-goals.model.ts";
+import { Investment } from "../investment/investment.model.ts";
 import { BillReminder } from "../bill-reminders/bill-reminders.model.ts";
 import { RecurringTransaction } from "../recurring-transactions/recurring-transactions.model.ts";
 import { Category } from "../category/category.model.ts";
@@ -159,6 +160,36 @@ export const getDashboardSummary = async (
       };
     });
 
+    // ─── 4.7. Investment Plans (Active only) ─────────────────────────────────
+    const activeInvestments = await Investment.findAll({
+      where: { userId, deleted: 0 },
+      include: [{ model: Category, attributes: ["id", "name"] }],
+    });
+
+    const investmentDetails = await Promise.all(
+      activeInvestments.map(async (inv) => {
+        const contributions = await Transaction.findAll({
+          where: { investmentId: inv.id, userId, deleted: 0 },
+          attributes: ["amount"],
+        });
+
+        const totalContributed = contributions.reduce((s, t) => s + Number(t.amount), 0);
+        const rawPercent = inv.targetAmount > 0 ? Number(((totalContributed / inv.targetAmount) * 100).toFixed(1)) : 0;
+
+        return {
+          id: inv.id,
+          name: inv.name,
+          category: (inv as any).Category?.name || '-',
+          amount: Number(inv.amount),
+          targetAmount: Number(inv.targetAmount),
+          totalContributed,
+          percent: rawPercent > 100 ? 100 : rawPercent,
+          maturityDate: inv.maturityDate,
+          status: inv.status,
+        };
+      })
+    );
+
     // ─── 5. Monthly spending trend (last 6 months) ───────────────────────────
     const months6 = lastNMonths(6);
     const trendData = await Promise.all(
@@ -285,6 +316,7 @@ export const getDashboardSummary = async (
       categoryExpenses,
       paymentMethodBreakdown,
       trendData,
+      investments: investmentDetails,
       savingsGoals: goalsData,
       bills: billsData,
       billAlerts: { overdueCount, dueSoonCount },

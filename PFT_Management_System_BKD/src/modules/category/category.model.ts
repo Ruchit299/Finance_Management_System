@@ -8,6 +8,7 @@ type CategoryAttributes = {
   id: number;
   name: string;
   userId: number | null;
+  type: "transaction" | "investment";
   deleted: number;
   createdAt: Date;
   updatedAt: Date;
@@ -16,13 +17,14 @@ type CategoryAttributes = {
 
 type CategoryCreationAttributes = Optional<
   CategoryAttributes,
-  "id" | "deleted" | "createdAt" | "updatedAt" | "deletedAt" | "userId"
+  "id" | "deleted" | "createdAt" | "updatedAt" | "deletedAt" | "userId" | "type"
 >;
 
 class Category extends Model<CategoryAttributes, CategoryCreationAttributes> implements CategoryAttributes {
   declare id: number;
   declare name: string;
   declare userId: number | null;
+  declare type: "transaction" | "investment";
   declare deleted: number;
   declare createdAt: Date;
   declare updatedAt: Date;
@@ -49,6 +51,11 @@ Category.init(
         model: User,
         key: "id",
       },
+    },
+    type: {
+      type: DataTypes.ENUM("transaction", "investment"),
+      allowNull: false,
+      defaultValue: "transaction",
     },
     deleted: {
       type: DataTypes.TINYINT,

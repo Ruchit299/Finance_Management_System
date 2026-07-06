@@ -5,44 +5,48 @@ import { Category } from "../category/category.model.ts";
 
 type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 
-type TransactionAttributes = {
+type InvestmentAttributes = {
   id: number;
   userId: number;
+  name: string;
   amount: number;
-  type: "income" | "expense";
+  targetAmount: number;
   categoryId: number;
   paymentMethod: "Cash" | "UPI" | "Online";
-  recurringTransactionId: number | null;
-  investmentId: number | null;
-  date: Date;
+  startDate: string;
+  maturityDate: string;
   notes: string | null;
+  status: "Active" | "Matured" | "Completed";
   deleted: number;
   createdAt: Date;
   updatedAt: Date;
   deletedAt: Date | null;
 };
 
-type TransactionCreationAttributes = Optional<TransactionAttributes,
-  "id" | "deleted" | "createdAt" | "updatedAt" | "deletedAt" | "notes" | "recurringTransactionId" | "paymentMethod" | "investmentId">;
+type InvestmentCreationAttributes = Optional<
+  InvestmentAttributes,
+  "id" | "notes" | "status" | "deleted" | "createdAt" | "updatedAt" | "deletedAt" | "paymentMethod"
+>;
 
-class Transaction extends Model<TransactionAttributes, TransactionCreationAttributes> implements TransactionAttributes {
+class Investment extends Model<InvestmentAttributes, InvestmentCreationAttributes> implements InvestmentAttributes {
   declare id: number;
   declare userId: number;
+  declare name: string;
   declare amount: number;
-  declare type: "income" | "expense";
+  declare targetAmount: number;
   declare categoryId: number;
   declare paymentMethod: "Cash" | "UPI" | "Online";
-  declare recurringTransactionId: number | null;
-  declare investmentId: number | null;
-  declare date: Date;
+  declare startDate: string;
+  declare maturityDate: string;
   declare notes: string | null;
+  declare status: "Active" | "Matured" | "Completed";
   declare deleted: number;
   declare createdAt: Date;
   declare updatedAt: Date;
   declare deletedAt: Date | null;
 }
 
-Transaction.init(
+Investment.init(
   {
     id: {
       type: DataTypes.INTEGER,
@@ -54,18 +58,26 @@ Transaction.init(
       type: DataTypes.INTEGER,
       allowNull: false,
       field: "user_id",
-      references: {
-        model: User,
-        key: "id",
-      },
+      references: { model: User, key: "id" },
+    },
+    name: {
+      type: DataTypes.STRING(100),
+      allowNull: false,
     },
     amount: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
     },
-    type: {
-      type: DataTypes.ENUM("income", "expense"),
+    targetAmount: {
+      type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
+      field: "target_amount",
+    },
+    categoryId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      field: "category_id",
+      references: { model: Category, key: "id" },
     },
     paymentMethod: {
       type: DataTypes.ENUM("Cash", "UPI", "Online"),
@@ -73,37 +85,24 @@ Transaction.init(
       defaultValue: "Cash",
       field: "payment_method",
     },
-    categoryId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      field: "category_id",
-      references: {
-        model: Category,
-        key: "id",
-      },
-    },
-    recurringTransactionId: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      field: "recurring_transaction_id",
-    },
-    investmentId: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      field: "investment_id",
-      references: {
-        model: "investments",
-        key: "id"
-      }
-    },
-    date: {
+    startDate: {
       type: DataTypes.DATEONLY,
       allowNull: false,
-      defaultValue: DataTypes.NOW,
+      field: "start_date",
+    },
+    maturityDate: {
+      type: DataTypes.DATEONLY,
+      allowNull: false,
+      field: "maturity_date",
     },
     notes: {
       type: DataTypes.TEXT,
       allowNull: true,
+    },
+    status: {
+      type: DataTypes.ENUM("Active", "Matured", "Completed"),
+      allowNull: false,
+      defaultValue: "Active",
     },
     deleted: {
       type: DataTypes.TINYINT,
@@ -127,18 +126,17 @@ Transaction.init(
   },
   {
     sequelize,
-    modelName: "Transaction",
-    tableName: "transactions",
+    modelName: "Investment",
+    tableName: "investments",
     timestamps: true,
     underscored: true,
   }
 );
 
-// Associations
-User.hasMany(Transaction, { foreignKey: "userId" });
-Transaction.belongsTo(User, { foreignKey: "userId" });
-Category.hasMany(Transaction, { foreignKey: "categoryId" });
-Transaction.belongsTo(Category, { foreignKey: "categoryId" });
+User.hasMany(Investment, { foreignKey: "userId" });
+Investment.belongsTo(User, { foreignKey: "userId" });
+Category.hasMany(Investment, { foreignKey: "categoryId" });
+Investment.belongsTo(Category, { foreignKey: "categoryId" });
 
-export { Transaction };
-export type { TransactionAttributes };
+export { Investment };
+export type { InvestmentAttributes };

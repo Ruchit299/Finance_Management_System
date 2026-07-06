@@ -19,6 +19,7 @@ export class CategoryMasterComponent implements OnInit {
   isLoading = false;
   errorMessage: string | null = null;
   successMessage: string | null = null;
+  selectedTab: 'transaction' | 'investment' = 'transaction';
 
   constructor(
     private categoryService: CategoryService,
@@ -29,9 +30,16 @@ export class CategoryMasterComponent implements OnInit {
     this.loadCategories();
   }
 
+  selectTab(tab: 'transaction' | 'investment'): void {
+    if (this.selectedTab === tab) return;
+    this.selectedTab = tab;
+    this.resetForm();
+    this.loadCategories();
+  }
+
   loadCategories(): void {
     this.isLoading = true;
-    this.categoryService.getAll().subscribe({
+    this.categoryService.getAll(this.selectedTab).subscribe({
       next: (res) => {
         this.isLoading = false;
         this.categories = res.result || [];
@@ -64,7 +72,7 @@ export class CategoryMasterComponent implements OnInit {
         }
       });
     } else {
-      this.categoryService.create(this.newCategoryName).subscribe({
+      this.categoryService.create(this.newCategoryName, this.selectedTab).subscribe({
         next: () => {
           this.successMessage = 'Category created successfully';
           this.resetForm();

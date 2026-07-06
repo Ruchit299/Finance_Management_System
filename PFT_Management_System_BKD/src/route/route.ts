@@ -8,6 +8,7 @@ import recurringTransactionsRouter from "../modules/recurring-transactions/recur
 import billRemindersRouter from "../modules/bill-reminders/bill-reminders.routes.ts";
 import dashboardRouter from "../modules/dashboard/dashboard.routes.ts";
 import categoryRouter from "../modules/category/category.routes.ts";
+import investmentRouter from "../modules/investment/investment.routes.ts";
 
 const router = express.Router();
 
@@ -24,5 +25,6 @@ router.use("/recurring-transactions", recurringTransactionsRouter);
 router.use("/bill-reminders", billRemindersRouter);
 router.use("/dashboard", dashboardRouter);
 router.use("/categories", categoryRouter);
+router.use("/investments", investmentRouter);
 
 export default router;

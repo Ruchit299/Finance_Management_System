@@ -11,9 +11,15 @@ export const getCategories = async (req: Request, res: Response): Promise<Respon
       return ResponseBuilder.error(res, 401, "User is not authenticated");
     }
 
+    const type = req.query.type ? String(req.query.type) : "transaction";
+    if (type !== "transaction" && type !== "investment") {
+      return ResponseBuilder.error(res, 400, "Validation error", "Invalid category type");
+    }
+
     const categories = await Category.findAll({
       where: {
         deleted: 0,
+        type,
         [Op.or]: [
           { userId: null },
           { userId: userId }
@@ -33,11 +39,16 @@ export const getCategories = async (req: Request, res: Response): Promise<Respon
 
 export const createCategory = async (req: Request, res: Response): Promise<Response | void> => {
   try {
-    const { name } = req.body;
+    const { name, type } = req.body;
     const userId = req.user?.id;
 
     if (!name || name.trim() === '') {
       return ResponseBuilder.error(res, 400, "Validation error", "Category name is required");
+    }
+
+    const categoryType = type || "transaction";
+    if (categoryType !== "transaction" && categoryType !== "investment") {
+      return ResponseBuilder.error(res, 400, "Validation error", "Invalid category type");
     }
 
     if (!userId) {
@@ -47,6 +58,7 @@ export const createCategory = async (req: Request, res: Response): Promise<Respo
     const existing = await Category.findOne({
       where: {
         name: name.trim(),
+        type: categoryType,
         deleted: 0,
         [Op.or]: [
           { userId: null },
@@ -61,6 +73,7 @@ export const createCategory = async (req: Request, res: Response): Promise<Respo
 
     const newCategory = await Category.create({
       name: name.trim(),
+      type: categoryType,
       userId
     });
 
@@ -99,6 +112,7 @@ export const updateCategory = async (req: Request, res: Response): Promise<Respo
     const existing = await Category.findOne({
       where: {
         name: name.trim(),
+        type: category.type,
         deleted: 0,
         id: { [Op.ne]: categoryId },
         [Op.or]: [{ userId: null }, { userId }]

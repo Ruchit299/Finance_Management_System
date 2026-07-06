@@ -46,6 +46,10 @@ export const routes: Routes = [
             {
                 path: 'categories',
                 loadComponent: () => import('./non-auth/pages/category-master/category-master').then(c => c.CategoryMasterComponent)
+            },
+            {
+                path: 'investments',
+                loadComponent: () => import('./non-auth/pages/investment/investment').then(c => c.InvestmentComponent)
             }
         ]
     },

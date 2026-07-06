@@ -36,6 +36,7 @@ export class Dashboard implements OnInit {
   recurringCount = 0;
   recentTransactions: any[] = [];
   paymentMethodBreakdown: any[] = [];
+  investments: any[] = [];
 
   // Color palette for charts
   categoryColors = ['#6366f1', '#22c55e', '#f59e0b', '#ef4444', '#3b82f6', '#8b5cf6', '#14b8a6'];
@@ -94,6 +95,7 @@ export class Dashboard implements OnInit {
         this.budgetDetails = res.budgetDetails || [];
         this.categoryExpenses = res.categoryExpenses || [];
         this.paymentMethodBreakdown = res.paymentMethodBreakdown || [];
+        this.investments = res.investments || [];
         this.trendData = res.trendData || [];
         this.savingsGoals = res.savingsGoals || [];
         this.bills = res.bills || [];

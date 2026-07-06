@@ -6,6 +6,12 @@ import { Log } from "../helper/middlewares/request.logger.ts";
 import { testDbConn, sequelize } from "../config/dbConnect.ts"
 import cors from 'cors';
 import { processRecurringTransactions } from "../helper/recurring-processor/recurringProcessor.ts";
+import { Transaction } from "../modules/transactions/transaction.model.ts";
+import { Investment } from "../modules/investment/investment.model.ts";
+
+Transaction.belongsTo(Investment, { foreignKey: "investmentId", as: "Investment" });
+Investment.hasMany(Transaction, { foreignKey: "investmentId" });
+
 dotenv.config();
 
 const PORT: Number = Number(process.env.PORT) || 8086;

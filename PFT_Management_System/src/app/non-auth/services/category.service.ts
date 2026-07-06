@@ -19,12 +19,13 @@ export class CategoryService {
     });
   }
 
-  getAll(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/get`, { headers: this.getHeaders() });
+  getAll(type?: string): Observable<any> {
+    const url = type ? `${this.apiUrl}/get?type=${type}` : `${this.apiUrl}/get`;
+    return this.http.get(url, { headers: this.getHeaders() });
   }
 
-  create(name: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/create`, { name }, { headers: this.getHeaders() });
+  create(name: string, type?: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/create`, { name, type }, { headers: this.getHeaders() });
   }
 
   update(id: number, name: string): Observable<any> {

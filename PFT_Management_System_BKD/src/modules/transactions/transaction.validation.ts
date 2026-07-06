@@ -33,6 +33,11 @@ class CreateTransactionDto {
   @IsOptional()
   @IsIn(["Cash", "UPI", "Online"], { message: "Payment method must be Cash, UPI or Online" })
   paymentMethod?: "Cash" | "UPI" | "Online";
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber({}, { message: "investmentId must be a valid number" })
+  investmentId?: number;
 }
 
 class UpdateTransactionDto {
@@ -62,6 +67,11 @@ class UpdateTransactionDto {
   @IsOptional()
   @IsIn(["Cash", "UPI", "Online"], { message: "Payment method must be Cash, UPI or Online" })
   paymentMethod?: "Cash" | "UPI" | "Online";
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber({}, { message: "investmentId must be a valid number" })
+  investmentId?: number;
 }
 
 class FilterTransactionDto {
@@ -77,6 +87,11 @@ class FilterTransactionDto {
   @Type(() => Number)
   @IsNumber({}, { message: "categoryId must be a valid number" })
   categoryId?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber({}, { message: "investmentId must be a valid number" })
+  investmentId?: number;
 
   @IsOptional()
   @IsIn(["income", "expense"], { message: "Type must be either 'income' or 'expense'" })
