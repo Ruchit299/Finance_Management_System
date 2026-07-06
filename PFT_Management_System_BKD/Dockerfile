@@ -6,6 +6,9 @@ WORKDIR /usr/src/app
 # Copy package configurations
 COPY package*.json ./
 
+# Install build dependencies required for compiling native modules like bcrypt
+RUN apk add --no-cache python3 make g++
+
 # Install all dependencies (including devDependencies for TypeScript build)
 RUN npm ci
 
@@ -28,8 +31,10 @@ ENV PORT=8086
 # Copy package configurations
 COPY package*.json ./
 
-# Install only production dependencies
-RUN npm ci --only=production
+# Install build dependencies required for compiling native modules like bcrypt
+RUN apk add --no-cache --virtual .build-deps python3 make g++ \
+    && npm ci --only=production \
+    && apk del .build-deps
 
 # Copy compiled JavaScript from builder stage
 COPY --from=builder /usr/src/app/dist ./dist
