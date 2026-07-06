@@ -19,7 +19,7 @@ const app = express();
 
 app.use(express.json())
 app.use(cors({
-  origin: 'http://localhost:9898',
+  origin: ['http://localhost:9898', "https://finance-management-system-1-j0pi.onrender.com"],
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
