@@ -2,10 +2,11 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { AuthService } from '../../auth/services/auth.service';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class BillRemindersService {
-  private apiUrl = 'http://localhost:8086/bill-reminders';
+  private apiUrl = `${environment.apiBaseUrl}/bill-reminders`;
 
   constructor(private http: HttpClient, private authService: AuthService) {}
 
