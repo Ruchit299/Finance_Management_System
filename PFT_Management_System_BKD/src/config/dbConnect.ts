@@ -13,7 +13,11 @@ const sequelize = new Sequelize(DB_NAME, DB_USERNAME, DB_PASSWORD, {
   dialect: DB_DIALECT,
   logging: false,
   dialectOptions: {
-    connectTimeout: 60000
+    connectTimeout: 60000,
+    ssl: {
+      minVersion: 'TLSv1.2',
+      rejectUnauthorized: true
+    }
   },
   pool: {
     max: 2,
