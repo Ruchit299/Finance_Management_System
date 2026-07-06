@@ -10,7 +10,7 @@ COPY package*.json ./
 RUN apk add --no-cache python3 make g++
 
 # Install all dependencies (including devDependencies for TypeScript build)
-RUN npm ci
+RUN npm install --force
 
 # Copy the rest of the application files
 COPY . .
@@ -33,7 +33,7 @@ COPY package*.json ./
 
 # Install build dependencies required for compiling native modules like bcrypt
 RUN apk add --no-cache --virtual .build-deps python3 make g++ \
-    && npm ci --only=production \
+    && npm install --only=production --force \
     && apk del .build-deps
 
 # Copy compiled JavaScript from builder stage
