@@ -1,0 +1,616 @@
+<div class="container-fluid py-4 px-4">
+
+  <!-- ── Page Header ───────────────────────────────────────────── -->
+  <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+    <div>
+      <h1 class="h2 fw-bold mb-0">
+        <i class="bi bi-grid-1x2 text-primary me-2"></i>Financial Dashboard
+      </h1>
+      <p class="text-muted small mb-0">
+        Welcome back, <strong>{{ user?.name }}</strong> — {{ timeframe === 'alltime' ? 'All Time' :
+        formatMonthYear(summary?.month) }}
+      </p>
+    </div>
+    <div class="d-flex gap-3 flex-wrap align-items-center">
+      <!-- Timeframe Selector Dropdown -->
+      <div class="d-flex gap-2 align-items-center">
+        <label class="text-secondary small fw-semibold me-1 d-none d-sm-inline">View Period:</label>
+        <ng-select [items]="periodOptions" bindValue="value" bindLabel="label" [ngModel]="selectedPeriod"
+          (ngModelChange)="onPeriodChange($event)" [clearable]="false" [searchable]="false" class="custom-period-select"
+          style="width: 200px; font-weight: 600;">
+        </ng-select>
+      </div>
+
+      <span *ngIf="billAlerts && billAlerts.overdueCount > 0" class="badge bg-danger rounded-pill px-3 py-2 fs-6">
+        <i class="bi bi-exclamation-triangle-fill me-1"></i>{{ billAlerts.overdueCount }} Bill{{ billAlerts.overdueCount
+        !== 1 ? 's' : '' }} Overdue
+      </span>
+      <span class="badge bg-white text-dark border py-2 px-3 rounded-pill shadow-sm">
+        <i class="bi bi-calendar3 me-2 text-primary"></i>{{ currentDate | date:'mediumDate' }}
+      </span>
+    </div>
+  </div>
+
+  <!-- ── Loading ──────────────────────────────────────────────────── -->
+  <div *ngIf="isLoading" class="d-flex flex-column align-items-center justify-content-center" style="min-height: 50vh;">
+    <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;"></div>
+    <p class="mt-3 text-muted fw-semibold">Loading your financial snapshot…</p>
+  </div>
+
+  <!-- ── Error ────────────────────────────────────────────────────── -->
+  <div *ngIf="!isLoading && errorMessage" class="alert alert-danger">
+    <i class="bi bi-exclamation-triangle me-2"></i>{{ errorMessage }}
+    <button class="btn btn-sm btn-outline-danger ms-3" (click)="loadDashboard()">Retry</button>
+  </div>
+
+  <ng-container *ngIf="!isLoading && !errorMessage && summary">
+
+    <!-- ── Summary Cards ─────────────────────────────────────────── -->
+    <div class="row g-3 mb-4">
+
+      <!-- Total Balance -->
+      <div class="col-6 col-md-4 col-xl-2">
+        <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden">
+          <div class="card-body p-3">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              <div class="bg-primary bg-opacity-10 text-primary rounded-3 p-2">
+                <i class="bi bi-wallet2 fs-5"></i>
+              </div>
+              <span class="text-muted x-small">All-time</span>
+            </div>
+            <p class="text-secondary small mb-1 fw-medium">Total Balance</p>
+            <h4 class="fw-bold mb-0" [class.text-success]="summary.totalBalance >= 0"
+              [class.text-danger]="summary.totalBalance < 0">
+              ₹{{ summary.totalBalance | number:'1.0-0' }}
+            </h4>
+          </div>
+        </div>
+      </div>
+
+      <!-- Monthly Income -->
+      <div class="col-6 col-md-4 col-xl-2">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+          <div class="card-body p-3">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              <div class="bg-success bg-opacity-10 text-success rounded-3 p-2">
+                <i class="bi bi-graph-up-arrow fs-5"></i>
+              </div>
+              <span class="text-success x-small fw-semibold"><i class="bi bi-arrow-up-short"></i>Inflow</span>
+            </div>
+            <p class="text-secondary small mb-1 fw-medium">{{ timeframe === 'alltime' ? 'Total Income' : 'Monthly
+              Income' }}</p>
+            <h4 class="fw-bold text-success mb-0">₹{{ summary.monthlyIncome | number:'1.0-0' }}</h4>
+          </div>
+        </div>
+      </div>
+
+      <!-- Monthly Expense -->
+      <div class="col-6 col-md-4 col-xl-2">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+          <div class="card-body p-3">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              <div class="bg-danger bg-opacity-10 text-danger rounded-3 p-2">
+                <i class="bi bi-graph-down-arrow fs-5"></i>
+              </div>
+              <span class="text-danger x-small fw-semibold"><i class="bi bi-arrow-down-short"></i>Outflow</span>
+            </div>
+            <p class="text-secondary small mb-1 fw-medium">{{ timeframe === 'alltime' ? 'Total Outflow' : 'Monthly
+              Expense' }}</p>
+            <h4 class="fw-bold text-danger mb-0">₹{{ summary.monthlyExpense | number:'1.0-0' }}</h4>
+          </div>
+        </div>
+      </div>
+
+      <!-- Savings -->
+      <div class="col-6 col-md-4 col-xl-2">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+          <div class="card-body p-3">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              <div class="bg-warning bg-opacity-10 text-warning rounded-3 p-2">
+                <i class="bi bi-piggy-bank fs-5"></i>
+              </div>
+              <span class="badge rounded-pill small"
+                [ngClass]="summary.monthlySavings >= 0 ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'">
+                {{ summary.monthlySavings >= 0 ? (timeframe === 'alltime' ? 'Net positive' : 'Saved') : (timeframe ===
+                'alltime' ? 'Net deficit' : 'Deficit') }}
+              </span>
+            </div>
+            <p class="text-secondary small mb-1 fw-medium">{{ timeframe === 'alltime' ? 'Total Savings' : 'Savings' }}
+            </p>
+            <h4 class="fw-bold mb-0" [class.text-success]="summary.monthlySavings >= 0"
+              [class.text-danger]="summary.monthlySavings < 0">
+              ₹{{ summary.monthlySavings | number:'1.0-0' }}
+            </h4>
+          </div>
+        </div>
+      </div>
+
+      <!-- Budget Utilization -->
+      <div *ngIf="timeframe !== 'alltime'" class="col-6 col-md-4 col-xl-2">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+          <div class="card-body p-3">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              <div class="bg-info bg-opacity-10 text-info rounded-3 p-2">
+                <i class="bi bi-pie-chart-fill fs-5"></i>
+              </div>
+              <span class="fw-bold small" [class.text-danger]="summary.overallBudgetUtilization > 100"
+                [class.text-warning]="summary.overallBudgetUtilization > 75 && summary.overallBudgetUtilization <= 100"
+                [class.text-success]="summary.overallBudgetUtilization <= 75">
+                {{ summary.overallBudgetUtilization }}%
+              </span>
+            </div>
+            <p class="text-secondary small mb-1 fw-medium">Budget Used</p>
+            <div class="progress mt-1" style="height:8px">
+              <div class="progress-bar rounded-pill"
+                [style.width.%]="summary.overallBudgetUtilization > 100 ? 100 : summary.overallBudgetUtilization"
+                [class.bg-danger]="summary.overallBudgetUtilization > 100"
+                [class.bg-warning]="summary.overallBudgetUtilization > 75 && summary.overallBudgetUtilization <= 100"
+                [class.bg-success]="summary.overallBudgetUtilization <= 75">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recurring / Bills -->
+      <div class="col-6 col-md-4 col-xl-2">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+          <div class="card-body p-3">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+              <div class="bg-secondary bg-opacity-10 text-secondary rounded-3 p-2">
+                <i class="bi bi-arrow-repeat fs-5"></i>
+              </div>
+              <span class="text-muted x-small">Active</span>
+            </div>
+            <p class="text-secondary small mb-1 fw-medium">Recurring Txns</p>
+            <h4 class="fw-bold mb-0">{{ recurringCount }}</h4>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── Charts Row ─────────────────────────────────────────────── -->
+    <div class="row g-4 mb-4">
+
+      <!-- Income vs Expense Bar Chart -->
+      <div class="col-12 col-lg-4">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+          <div class="card-body p-4">
+            <h5 class="fw-bold mb-1">Income vs Expense</h5>
+            <p class="text-muted small mb-4">{{ timeframe === 'alltime' ? 'All-time comparison' : 'Selected month\'s
+              comparison' }}</p>
+
+            <svg viewBox="0 0 200 120" class="w-100" style="max-height: 200px;">
+              <!-- Grid lines -->
+              <line x1="20" y1="20" x2="185" y2="20" stroke="#f0f0f0" stroke-width="0.5" />
+              <line x1="20" y1="50" x2="185" y2="50" stroke="#f0f0f0" stroke-width="0.5" />
+              <line x1="20" y1="80" x2="185" y2="80" stroke="#f0f0f0" stroke-width="0.5" />
+              <line x1="20" y1="100" x2="185" y2="100" stroke="#e0e0e0" stroke-width="0.5" />
+
+              <!-- Income bar -->
+              <rect x="45" [attr.y]="getBarY(summary.monthlyIncome)" width="35"
+                [attr.height]="getBarHeight(summary.monthlyIncome)" fill="#22c55e" rx="3" />
+              <text [attr.x]="62.5" [attr.y]="getBarY(summary.monthlyIncome) - 3" font-size="6.5" fill="#15803d"
+                font-weight="bold" text-anchor="middle">
+                ₹{{ summary.monthlyIncome | number:'1.0-0' }}
+              </text>
+
+              <!-- Expense bar -->
+              <rect x="115" [attr.y]="getBarY(summary.monthlyExpense)" width="35"
+                [attr.height]="getBarHeight(summary.monthlyExpense)" fill="#ef4444" rx="3" />
+              <text [attr.x]="132.5" [attr.y]="getBarY(summary.monthlyExpense) - 3" font-size="6.5" fill="#b91c1c"
+                font-weight="bold" text-anchor="middle">
+                ₹{{ summary.monthlyExpense | number:'1.0-0' }}
+              </text>
+
+              <!-- Labels -->
+              <text x="62.5" y="112" font-size="7.5" fill="#6c757d" text-anchor="middle"
+                font-weight="bold">Income</text>
+              <text x="132.5" y="112" font-size="7.5" fill="#6c757d" text-anchor="middle"
+                font-weight="bold">Expense</text>
+            </svg>
+
+            <!-- Net -->
+            <div class="mt-3 p-2 rounded-3 text-center" [class.bg-success-subtle]="summary.monthlySavings >= 0"
+              [class.bg-danger-subtle]="summary.monthlySavings < 0">
+              <span class="small fw-semibold" [class.text-success]="summary.monthlySavings >= 0"
+                [class.text-danger]="summary.monthlySavings < 0">
+                {{ summary.monthlySavings >= 0 ? 'Net Saved' : 'Net Deficit' }}: ₹{{ summary.monthlySavings |
+                number:'1.0-0' }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Category-wise Expenses Donut Chart -->
+      <div class="col-12 col-lg-4">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+          <div class="card-body p-4">
+            <h5 class="fw-bold mb-1">Category Expenses</h5>
+            <p class="text-muted small mb-3">{{ timeframe === 'alltime' ? 'Spending breakdown for all time' : 'Spending
+              breakdown for selected month' }}</p>
+
+            <!-- No expense data -->
+            <div *ngIf="categoryExpenses.length === 0" class="text-center py-4">
+              <i class="bi bi-pie-chart display-4 text-muted opacity-25"></i>
+              <p class="text-muted small mt-2">No expenses recorded for this period</p>
+            </div>
+
+            <div *ngIf="categoryExpenses.length > 0">
+              <div class="row align-items-center">
+                <!-- Pie SVG -->
+                <div class="col-5">
+                  <svg viewBox="0 0 100 100" class="w-100">
+                    <circle cx="50" cy="50" r="25" fill="#f3f4f6" stroke="transparent" stroke-width="0" />
+                    <ng-container *ngFor="let seg of getDonutSegments()">
+                      <circle cx="50" cy="50" r="25" fill="transparent" [attr.stroke]="seg.color" stroke-width="50"
+                        pathLength="100" [attr.stroke-dasharray]="seg.dashArray"
+                        [attr.stroke-dashoffset]="seg.dashOffset" transform="rotate(-90 50 50)"
+                        style="transition: stroke-dasharray 0.5s ease; cursor: pointer;" class="pie-segment">
+                        <title>{{ seg.label }}: ₹{{ seg.amount | number:'1.0-0' }} ({{ seg.percent }}%)</title>
+                      </circle>
+                    </ng-container>
+                  </svg>
+                </div>
+                <!-- Legend -->
+                <div class="col-7">
+                  <div class="d-flex flex-column gap-2">
+                    <div *ngFor="let cat of categoryExpenses; let i = index"
+                      class="d-flex align-items-center justify-content-between">
+                      <span class="small d-flex align-items-center gap-1">
+                        <span class="rounded-circle d-inline-block"
+                          [style.background]="categoryColors[i % categoryColors.length]"
+                          style="width:9px;height:9px;flex-shrink:0;"></span>
+                        {{ cat.category }}
+                      </span>
+                      <span class="text-muted x-small fw-semibold">{{ cat.percent }}%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Expense Breakdown Table -->
+              <div class="mt-4 pt-3 border-top animate-fade-in">
+                <table class="table table-sm table-hover align-middle mb-0 text-start" style="font-size: 0.85rem;">
+                  <thead>
+                    <tr class="text-secondary opacity-75">
+                      <th class="border-0 ps-0 fw-semibold">Category</th>
+                      <th class="border-0 text-end fw-semibold">Spent</th>
+                      <th class="border-0 text-end fw-semibold">Share</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let cat of categoryExpenses; let i = index">
+                      <td class="border-0 ps-0 fw-medium d-flex align-items-center gap-2">
+                        <span class="rounded-circle d-inline-block"
+                          [style.background]="categoryColors[i % categoryColors.length]"
+                          style="width:8px;height:8px;flex-shrink:0;"></span>
+                        {{ cat.category }}
+                      </td>
+                      <td class="border-0 text-end fw-semibold text-dark">₹{{ cat.amount | number:'1.0-0' }}</td>
+                      <td class="border-0 text-end text-secondary fw-semibold">{{ cat.percent }}%</td>
+                    </tr>
+                    <tr class="fw-bold border-top">
+                      <td class="ps-0 pt-2 text-dark">Total Expenses</td>
+                      <td class="text-end pt-2 text-danger">₹{{ summary.monthlyExpense | number:'1.0-0' }}</td>
+                      <td class="text-end pt-2 text-secondary">100%</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Monthly Trend Chart -->
+      <div class="col-12 col-lg-4">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+          <div class="card-body p-4">
+            <h5 class="fw-bold mb-1">6-Month Trend</h5>
+            <p class="text-muted small mb-3">Income vs Expense over time</p>
+
+            <div *ngIf="trendData.length === 0" class="text-center py-4">
+              <i class="bi bi-graph-up display-4 text-muted opacity-25"></i>
+              <p class="text-muted small mt-2">No data available yet</p>
+            </div>
+
+            <svg *ngIf="trendData.length > 0" viewBox="0 0 480 130" class="w-100">
+              <defs>
+                <linearGradient id="incomeGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#22c55e" stop-opacity="0.3" />
+                  <stop offset="100%" stop-color="#22c55e" stop-opacity="0" />
+                </linearGradient>
+                <linearGradient id="expenseGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#ef4444" stop-opacity="0.25" />
+                  <stop offset="100%" stop-color="#ef4444" stop-opacity="0" />
+                </linearGradient>
+              </defs>
+              <!-- Grid -->
+              <line x1="20" y1="10" x2="470" y2="10" stroke="#f0f0f0" stroke-width="0.5" />
+              <line x1="20" y1="40" x2="470" y2="40" stroke="#f0f0f0" stroke-width="0.5" />
+              <line x1="20" y1="70" x2="470" y2="70" stroke="#f0f0f0" stroke-width="0.5" />
+              <line x1="20" y1="110" x2="470" y2="110" stroke="#e0e0e0" stroke-width="0.5" />
+
+              <!-- Filled income area -->
+              <polygon [attr.points]="getTrendIncomePoints() + ' ' + getTrendX(trendData.length-1) + ',110 20,110'"
+                fill="url(#incomeGrad)" />
+              <!-- Filled expense area -->
+              <polygon [attr.points]="getTrendPoints() + ' ' + getTrendX(trendData.length-1) + ',110 20,110'"
+                fill="url(#expenseGrad)" />
+
+              <!-- Income line -->
+              <polyline [attr.points]="getTrendIncomePoints()" fill="none" stroke="#22c55e" stroke-width="2.5"
+                stroke-linejoin="round" />
+              <!-- Expense line -->
+              <polyline [attr.points]="getTrendPoints()" fill="none" stroke="#ef4444" stroke-width="2.5"
+                stroke-linejoin="round" />
+
+              <!-- Data points + x-labels -->
+              <ng-container *ngFor="let d of trendData; let i = index">
+                <circle [attr.cx]="getTrendX(i)" [attr.cy]="getTrendY(d.income)" r="3.5" fill="#22c55e" />
+                <circle [attr.cx]="getTrendX(i)" [attr.cy]="getTrendY(d.expense)" r="3.5" fill="#ef4444" />
+                <text [attr.x]="getTrendX(i)" y="124" font-size="8" fill="#6c757d" text-anchor="middle">
+                  {{ getMonthLabel(d.month) }}
+                </text>
+              </ng-container>
+            </svg>
+
+            <!-- Legend -->
+            <div class="d-flex gap-3 mt-2 justify-content-center" *ngIf="trendData.length > 0">
+              <span class="small"><span class="me-1" style="color:#22c55e">●</span>Income</span>
+              <span class="small"><span class="me-1" style="color:#ef4444">●</span>Expense</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── Bottom Section ─────────────────────────────────────────── -->
+    <div class="row g-4">
+
+      <!-- Budget Utilization -->
+      <div *ngIf="timeframe !== 'alltime'" class="col-12 col-lg-4">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="fw-bold mb-0">Budget Status</h5>
+              <a routerLink="/budget" class="btn btn-sm btn-outline-primary rounded-pill">Manage</a>
+            </div>
+
+            <div *ngIf="budgetDetails.length === 0" class="text-center py-3">
+              <i class="bi bi-sliders display-4 text-muted opacity-25"></i>
+              <p class="text-muted small mt-2">No budgets set for this period</p>
+              <a routerLink="/budget" class="btn btn-sm btn-primary">Set Budget</a>
+            </div>
+
+            <div class="d-flex flex-column gap-3" *ngIf="budgetDetails.length > 0">
+              <div *ngFor="let b of budgetDetails">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                  <span class="small fw-semibold">{{ b.category }}</span>
+                  <span class="small" [class.text-danger]="b.isExceeded" [class.text-muted]="!b.isExceeded">
+                    {{ b.isExceeded ? '⚠️ Exceeded' : (b.percent + '%') }}
+                  </span>
+                </div>
+                <div class="progress" style="height: 8px; border-radius: 6px;">
+                  <div class="progress-bar" [style.width.%]="b.percent > 100 ? 100 : b.percent"
+                    [style.background-color]="getBudgetBarColor(b.isExceeded, b.percent)"
+                    style="border-radius: 6px; transition: width 0.4s ease;">
+                  </div>
+                </div>
+                <div class="d-flex justify-content-between mt-1">
+                  <span class="text-muted" style="font-size: 0.7rem;">₹{{ b.spent | number:'1.0-0' }} spent</span>
+                  <span class="text-muted" style="font-size: 0.7rem;">of ₹{{ b.budgetAmount | number:'1.0-0' }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Savings Goals -->
+      <div class="col-12" [ngClass]="timeframe === 'alltime' ? 'col-lg-6' : 'col-lg-4'">
+        <div class="card border-0 shadow-sm rounded-4 h-100">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="fw-bold mb-0">Savings Goals</h5>
+              <a routerLink="/savings-goals" class="btn btn-sm btn-outline-success rounded-pill">View All</a>
+            </div>
+
+            <div *ngIf="savingsGoals.length === 0" class="text-center py-3">
+              <i class="bi bi-piggy-bank display-4 text-muted opacity-25"></i>
+              <p class="text-muted small mt-2">No savings goals created yet</p>
+              <a routerLink="/savings-goals" class="btn btn-sm btn-success">Create Goal</a>
+            </div>
+
+            <div class="d-flex flex-column gap-3" *ngIf="savingsGoals.length > 0">
+              <div *ngFor="let g of savingsGoals">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                  <div>
+                    <span class="small fw-semibold">{{ g.name }}</span>
+                    <span *ngIf="g.isCompleted" class="badge bg-success-subtle text-success ms-2"
+                      style="font-size:0.65rem;">✅ Done</span>
+                  </div>
+                  <span class="small fw-bold" [style.color]="getProgressColor(g.percent)">
+                    {{ g.percent }}%
+                  </span>
+                </div>
+                <div class="progress" style="height: 8px; border-radius: 6px;">
+                  <div class="progress-bar" [style.width.%]="g.percent > 100 ? 100 : g.percent"
+                    [style.background-color]="getProgressColor(g.percent)"
+                    style="border-radius: 6px; transition: width 0.4s ease;">
+                  </div>
+                </div>
+                <div class="d-flex justify-content-between mt-1">
+                  <span class="text-muted" style="font-size:0.7rem;">₹{{ g.savedAmount | number:'1.0-0' }} saved</span>
+                  <span class="text-muted" style="font-size:0.7rem;">Target: ₹{{ g.targetAmount | number:'1.0-0'
+                    }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Investment Plans Widget -->
+        <div class="card border-0 shadow-sm rounded-4 mt-4 animate-fade-in">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="fw-bold mb-0">Investment Plans</h5>
+              <a routerLink="/investments" class="btn btn-sm btn-outline-info rounded-pill">View All</a>
+            </div>
+
+            <div *ngIf="investments.length === 0" class="text-center py-3">
+              <i class="bi bi-graph-up-arrow display-4 text-muted opacity-25"></i>
+              <p class="text-muted small mt-2">No active investments found</p>
+              <a routerLink="/investments" class="btn btn-sm btn-info text-white">Create Plan</a>
+            </div>
+
+            <div class="d-flex flex-column gap-3" *ngIf="investments.length > 0">
+              <div *ngFor="let inv of investments">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                  <div>
+                    <span class="small fw-semibold">{{ inv.name }}</span>
+                    <span class="badge bg-light text-dark border ms-2" style="font-size:0.6rem;">{{ inv.category }}</span>
+                  </div>
+                  <span class="small fw-bold text-primary">
+                    {{ inv.percent }}%
+                  </span>
+                </div>
+                <div class="progress" style="height: 8px; border-radius: 6px;">
+                  <div class="progress-bar bg-primary"
+                       [style.width.%]="inv.percent > 100 ? 100 : inv.percent"
+                       style="border-radius: 6px; transition: width 0.4s ease;">
+                  </div>
+                </div>
+                <div class="d-flex justify-content-between mt-1">
+                  <span class="text-muted" style="font-size:0.7rem;">₹{{ inv.totalContributed | number:'1.0-0' }} contributed</span>
+                  <span class="text-muted" style="font-size:0.7rem;">Target: ₹{{ inv.targetAmount | number:'1.0-0' }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bills & Recent Transactions -->
+      <div class="col-12" [ngClass]="timeframe === 'alltime' ? 'col-lg-6' : 'col-lg-4'">
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="fw-bold mb-0">Upcoming Bills</h5>
+              <a routerLink="/bill-reminders" class="btn btn-sm btn-outline-warning rounded-pill">View All</a>
+            </div>
+
+            <div *ngIf="bills.length === 0" class="text-center py-2">
+              <i class="bi bi-bell display-4 text-muted opacity-25"></i>
+              <p class="text-muted small mt-1">No pending bills</p>
+            </div>
+
+            <div class="d-flex flex-column gap-2" *ngIf="bills.length > 0">
+              <div *ngFor="let b of bills" class="d-flex align-items-center justify-content-between p-2 rounded-3"
+                [class.bg-danger-subtle]="b.alertLevel === 'overdue' || b.alertLevel === 'critical'"
+                [class.bg-warning-subtle]="b.alertLevel === 'warning' || b.alertLevel === 'soon'"
+                [class.bg-light]="b.alertLevel === 'ok'">
+                <div>
+                  <div class="small fw-semibold">{{ b.name }}</div>
+                  <div style="font-size:0.7rem;" class="text-muted">{{ b.dueDate }} · {{ b.category }}</div>
+                </div>
+                <div class="text-end">
+                  <div class="fw-bold small text-danger">₹{{ b.amount | number:'1.0-0' }}</div>
+                  <span class="badge rounded-pill px-2" style="font-size:0.6rem;"
+                    [ngClass]="getAlertBadgeClass(b.alertLevel)">
+                    {{ getAlertLabel(b.alertLevel, b.daysLeft) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payment Methods Breakdown -->
+        <div class="card border-0 shadow-sm rounded-4 mb-4 animate-fade-in">
+          <div class="card-body p-4">
+            <h5 class="fw-bold mb-1">Payment Modes</h5>
+            <p class="text-muted small mb-3">Expenses by payment method</p>
+
+            <div class="d-flex flex-column gap-3">
+              <div *ngFor="let pm of paymentMethodBreakdown">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                  <span class="small fw-semibold d-flex align-items-center gap-2">
+                    <i class="bi fs-5" [ngClass]="{
+                      'bi-cash-coin text-info': pm.method === 'Cash',
+                      'bi-phone text-primary': pm.method === 'UPI',
+                      'bi-credit-card text-warning': pm.method === 'Online'
+                    }"></i>
+                    {{ pm.method }}
+                  </span>
+                  <span class="small text-muted fw-semibold">{{ pm.percent }}%</span>
+                </div>
+                <div class="progress" style="height: 6px; border-radius: 4px;">
+                  <div class="progress-bar"
+                       [style.width.%]="pm.percent"
+                       [ngClass]="{
+                         'bg-info': pm.method === 'Cash',
+                         'bg-primary': pm.method === 'UPI',
+                         'bg-warning': pm.method === 'Online'
+                       }"
+                       style="border-radius: 4px; transition: width 0.4s ease;">
+                  </div>
+                </div>
+                <div class="d-flex justify-content-between mt-1">
+                  <span class="text-muted" style="font-size: 0.7rem;">₹{{ pm.amount | number:'1.0-0' }} spent</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Transactions -->
+        <div class="card border-0 shadow-sm rounded-4">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="fw-bold mb-0">Recent Transactions</h5>
+              <a routerLink="/transactions" class="btn btn-sm btn-outline-primary rounded-pill">All</a>
+            </div>
+
+            <div *ngIf="recentTransactions.length === 0" class="text-center py-2">
+              <p class="text-muted small mb-0">No transactions yet</p>
+            </div>
+
+            <div class="d-flex flex-column gap-2" *ngIf="recentTransactions.length > 0">
+              <div *ngFor="let t of recentTransactions"
+                class="d-flex align-items-center justify-content-between py-1 border-bottom border-light">
+                <div class="d-flex align-items-center gap-2">
+                  <div class="rounded-circle d-flex align-items-center justify-content-center"
+                    style="width:32px;height:32px;" [class.bg-success-subtle]="t.type === 'income'"
+                    [class.bg-danger-subtle]="t.type === 'expense'">
+                    <i class="bi small" [class.bi-arrow-up-circle-fill]="t.type === 'income'"
+                      [class.text-success]="t.type === 'income'"
+                      [class.bi-arrow-down-circle-fill]="t.type === 'expense'"
+                      [class.text-danger]="t.type === 'expense'"></i>
+                  </div>
+                  <div>
+                    <div class="small fw-semibold d-flex align-items-center gap-1">
+                      {{ t.category }}
+                      <span class="badge bg-light text-dark border px-1.5 py-0.5" style="font-size: 0.6rem;">{{
+                        t.paymentMethod || 'Cash' }}</span>
+                    </div>
+                    <div style="font-size:0.7rem;" class="text-muted">{{ t.date }}</div>
+                  </div>
+                </div>
+                <span class="fw-bold small" [class.text-success]="t.type === 'income'"
+                  [class.text-danger]="t.type === 'expense'">
+                  {{ t.type === 'income' ? '+' : '-' }}₹{{ t.amount | number:'1.0-0' }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </ng-container>
+</div>

@@ -1,0 +1,212 @@
+<div class="container py-4">
+
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold mb-0">
+                <i class="bi bi-piggy-bank text-success me-2"></i>Savings Goals
+            </h2>
+            <p class="text-muted mb-0 small">Track and manage your financial goals</p>
+        </div>
+        <button class="btn btn-success px-4 fw-semibold" id="btn-add-goal" (click)="openAddModal()">
+            <i class="bi bi-plus-circle me-2"></i>New Goal
+        </button>
+    </div>
+
+    <!-- Loading -->
+    <div *ngIf="isLoading" class="text-center py-5">
+        <div class="spinner-border text-success" role="status"></div>
+        <p class="mt-2 text-muted">Loading savings goals...</p>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!isLoading && goals.length === 0" class="text-center py-5">
+        <i class="bi bi-piggy-bank display-1 text-muted opacity-25"></i>
+        <h5 class="mt-3 text-muted">No savings goals yet</h5>
+        <p class="text-muted small">Create your first savings goal to start tracking your progress</p>
+        <button class="btn btn-success" (click)="openAddModal()">
+            <i class="bi bi-plus me-2"></i>Create First Goal
+        </button>
+    </div>
+
+    <!-- Goals Grid -->
+    <div class="row g-4" *ngIf="!isLoading && goals.length > 0">
+        <div class="col-md-6 col-xl-4" *ngFor="let goal of goals">
+            <div class="card border-0 shadow-sm h-100" [class.border-success]="goal.isCompleted"
+                [style.border-left]="goal.isCompleted ? '4px solid #22c55e' : '4px solid #6366f1'">
+                <div class="card-body p-4">
+
+                    <!-- Goal Header -->
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h5 class="fw-bold mb-0">{{ goal.name }}</h5>
+                            <p class="text-muted small mb-0" *ngIf="goal.description">{{ goal.description }}</p>
+                        </div>
+                        <span class="badge rounded-pill" [class.bg-success]="goal.isCompleted"
+                            [class.bg-primary]="!goal.isCompleted && goal.percent >= 75"
+                            [class.bg-warning]="!goal.isCompleted && goal.percent >= 50 && goal.percent < 75"
+                            [class.bg-danger]="!goal.isCompleted && goal.percent < 50">
+                            {{ goal.isCompleted ? '✅ Completed' : goal.percent + '%' }}
+                        </span>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="mb-3">
+                        <div class="progress" style="height: 12px; border-radius: 8px;">
+                            <div class="progress-bar" role="progressbar"
+                                [style.width.%]="goal.percent > 100 ? 100 : goal.percent"
+                                [style.background-color]="getProgressColor(goal.percent)"
+                                style="border-radius: 8px; transition: width 0.5s ease;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Amounts -->
+                    <div class="row text-center mb-3">
+                        <div class="col-6 border-end">
+                            <div class="text-success fw-bold fs-5">₹{{ goal.savedAmount | number:'1.0-0' }}</div>
+                            <div class="text-muted small">Saved</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-primary fw-bold fs-5">₹{{ goal.targetAmount | number:'1.0-0' }}</div>
+                            <div class="text-muted small">Target</div>
+                        </div>
+                    </div>
+
+                    <!-- Remaining & Due Date -->
+                    <div class="d-flex justify-content-between align-items-center mb-3 p-2 rounded-3 bg-light">
+                        <span class="small text-muted">
+                            <i class="bi bi-calendar-event me-1"></i>{{ goal.targetDate }}
+                        </span>
+                        <span class="small fw-semibold" [class.text-danger]="goal.daysLeft < 0"
+                            [class.text-warning]="goal.daysLeft >= 0 && goal.daysLeft <= 30"
+                            [class.text-success]="goal.daysLeft > 30">
+                            {{ getDaysLabel(goal.daysLeft) }}
+                        </span>
+                    </div>
+
+                    <!-- Remaining amount -->
+                    <div class="text-center small text-muted mb-3" *ngIf="!goal.isCompleted">
+                        ₹{{ goal.remaining | number:'1.0-0' }} remaining to reach goal
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-success flex-fill" id="btn-deposit-{{ goal.id }}"
+                            (click)="openDepositModal(goal)" [disabled]="goal.isCompleted">
+                            <i class="bi bi-plus-circle me-1"></i>Add Money
+                        </button>
+                        <button class="btn btn-sm btn-outline-primary" id="btn-edit-goal-{{ goal.id }}"
+                            (click)="openEditModal(goal)">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger" id="btn-delete-goal-{{ goal.id }}"
+                            (click)="deleteGoal(goal.id)">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ============ Goal Create/Edit Modal ============ -->
+<div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);" *ngIf="showGoalModal">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">
+                    <i class="bi bi-piggy-bank text-success me-2"></i>
+                    {{ isEditing ? 'Edit Savings Goal' : 'Create New Goal' }}
+                </h5>
+                <button type="button" class="btn-close" (click)="closeModals()"></button>
+            </div>
+            <div class="modal-body pt-3">
+
+                <div *ngIf="successMessage" class="alert alert-success py-2 small">{{ successMessage }}</div>
+                <div *ngIf="errorMessage" class="alert alert-danger py-2 small">{{ errorMessage }}</div>
+
+                <form [formGroup]="goalForm">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Goal Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" formControlName="name" id="goal-name"
+                            placeholder="e.g. Emergency Fund, Vacation, New Car"
+                            [class.is-invalid]="goalForm.get('name')?.invalid && goalForm.get('name')?.touched">
+                        <div class="invalid-feedback">Goal name is required (max 100 chars)</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Description</label>
+                        <textarea class="form-control" formControlName="description" id="goal-description" rows="2"
+                            placeholder="Optional description..."></textarea>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <div class="col-6">
+                            <label class="form-label fw-semibold">Target Amount (₹) <span
+                                    class="text-danger">*</span></label>
+                            <input type="number" class="form-control" formControlName="targetAmount"
+                                id="goal-target-amount" placeholder="0.00" min="0.01" step="0.01"
+                                [class.is-invalid]="goalForm.get('targetAmount')?.invalid && goalForm.get('targetAmount')?.touched">
+                            <div class="invalid-feedback">Enter a valid target amount</div>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label fw-semibold">Target Date <span class="text-danger">*</span></label>
+                            <mat-form-field class="w-100 compact-datepicker">
+                                <input matInput [matDatepicker]="targetPicker" formControlName="targetDate" required
+                                    [min]="today" placeholder="Choose Date">
+                                <mat-datepicker-toggle matIconSuffix [for]="targetPicker"></mat-datepicker-toggle>
+                                <mat-datepicker #targetPicker></mat-datepicker>
+                            </mat-form-field>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2 justify-content-end mt-3">
+                        <button type="button" class="btn btn-light" (click)="closeModals()">Cancel</button>
+                        <button type="button" class="btn btn-success px-4" id="btn-save-goal" (click)="saveGoal()">
+                            {{ isEditing ? 'Update Goal' : 'Create Goal' }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============ Deposit Modal ============ -->
+<div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);" *ngIf="showDepositModal">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">
+                    <i class="bi bi-plus-circle text-success me-2"></i>Add Money
+                </h5>
+                <button type="button" class="btn-close" (click)="closeModals()"></button>
+            </div>
+            <div class="modal-body pt-3">
+
+                <div *ngIf="successMessage" class="alert alert-success py-2 small">{{ successMessage }}</div>
+                <div *ngIf="errorMessage" class="alert alert-danger py-2 small">{{ errorMessage }}</div>
+
+                <form [formGroup]="depositForm">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Amount to Add (₹) <span
+                                class="text-danger">*</span></label>
+                        <input type="number" class="form-control" formControlName="amount" id="deposit-amount"
+                            placeholder="0.00" min="0.01" step="0.01"
+                            [class.is-invalid]="depositForm.get('amount')?.invalid && depositForm.get('amount')?.touched">
+                        <div class="invalid-feedback">Enter a valid amount</div>
+                    </div>
+                    <div class="d-flex gap-2 justify-content-end">
+                        <button type="button" class="btn btn-light" (click)="closeModals()">Cancel</button>
+                        <button type="button" class="btn btn-success px-4" id="btn-save-deposit" (click)="addDeposit()">
+                            Add Money
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

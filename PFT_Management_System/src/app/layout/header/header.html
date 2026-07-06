@@ -1,0 +1,122 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark border-bottom border-secondary shadow-sm py-2">
+    <div class="container">
+        <!-- Brand logo/name -->
+        <a class="navbar-brand d-flex align-items-center fw-bold gap-2 text-white" routerLink="/dashboard">
+            <i class="bi bi-bank fs-4 text-primary"></i>
+            <span>PFT Portal</span>
+        </a>
+
+        <!-- Mobile Toggler -->
+        <button class="navbar-toggler border-0 shadow-none" type="button" (click)="toggleMenu()" aria-expanded="false"
+            aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Navbar items -->
+        <div class="collapse navbar-collapse" [class.show]="!isMenuCollapsed" id="headerNavbar">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-1" (click)="isMenuCollapsed = true">
+                <li class="nav-item">
+                    <a class="nav-link px-3 rounded-2 text-white opacity-75" routerLink="/dashboard"
+                        routerLinkActive="active opacity-100 fw-semibold bg-secondary bg-opacity-25">
+                        <i class="bi bi-grid-1x2 me-1"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link px-3 rounded-2 text-white opacity-75" routerLink="/transactions"
+                        routerLinkActive="active opacity-100 fw-semibold bg-secondary bg-opacity-25">
+                        <i class="bi bi-wallet2 me-1"></i> Transactions
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link px-3 rounded-2 text-white opacity-75" routerLink="/budget"
+                        routerLinkActive="active opacity-100 fw-semibold bg-secondary bg-opacity-25">
+                        <i class="bi bi-sliders me-1"></i> Budget
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link px-3 rounded-2 text-white opacity-75" routerLink="/savings-goals"
+                        routerLinkActive="active opacity-100 fw-semibold bg-secondary bg-opacity-25">
+                        <i class="bi bi-piggy-bank me-1"></i> Savings Goals
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link px-3 rounded-2 text-white opacity-75" routerLink="/recurring-transactions"
+                        routerLinkActive="active opacity-100 fw-semibold bg-secondary bg-opacity-25">
+                        <i class="bi bi-arrow-repeat me-1"></i> Recurring
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link px-3 rounded-2 text-white opacity-75" routerLink="/bill-reminders"
+                        routerLinkActive="active opacity-100 fw-semibold bg-secondary bg-opacity-25">
+                        <i class="bi bi-bell me-1"></i> Bills
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link px-3 rounded-2 text-white opacity-75" routerLink="/categories"
+                        routerLinkActive="active opacity-100 fw-semibold bg-secondary bg-opacity-25">
+                        <i class="bi bi-tags me-1"></i> Categories
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link px-3 rounded-2 text-white opacity-75" routerLink="/investments"
+                        routerLinkActive="active opacity-100 fw-semibold bg-secondary bg-opacity-25">
+                        <i class="bi bi-graph-up-arrow me-1"></i> Investments
+                    </a>
+                </li>
+                <li class="nav-item" *ngIf="user?.isAdmin">
+                    <a class="nav-link px-3 rounded-2 text-white opacity-75" routerLink="/users"
+                        routerLinkActive="active opacity-100 fw-semibold bg-secondary bg-opacity-25">
+                        <i class="bi bi-people me-1"></i> Users
+                    </a>
+                </li>
+            </ul>
+
+
+            <!-- User Profile Dropdown -->
+            <div class="navbar-nav align-items-lg-center">
+                <div class="nav-item dropdown w-100 w-lg-auto">
+                    <button
+                        class="btn btn-outline-light border-0 dropdown-toggle w-100 text-start d-flex align-items-center justify-content-between justify-content-lg-start gap-2 py-2 px-3 rounded-3"
+                        type="button" id="userMenuButton" (click)="toggleDropdown($event)" aria-expanded="false">
+                        <span class="d-flex align-items-center gap-2">
+                            <i class="bi bi-person-circle fs-5 text-primary"></i>
+                            <span class="fw-medium">{{ user?.name || 'User Profile' }}</span>
+                        </span>
+                    </button>
+
+                    <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg mt-2 py-2 rounded-3"
+                        [class.show]="isDropdownOpen" aria-labelledby="userMenuButton"
+                        (click)="isDropdownOpen = false; isMenuCollapsed = true">
+                        <li class="px-3 py-2 border-bottom mb-2 bg-light">
+                            <div class="fw-bold text-dark small">{{ user?.name }}</div>
+                            <div class="text-secondary small opacity-75">{{ user?.email }}</div>
+                            <span *ngIf="user?.isAdmin"
+                                class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-2 py-0.5 mt-1 small">Admin</span>
+                        </li>
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center gap-2 py-2 text-dark"
+                                routerLink="/profile">
+                                <i class="bi bi-person text-secondary"></i> My Profile
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item d-flex align-items-center gap-2 py-2 text-dark"
+                                routerLink="/settings">
+                                <i class="bi bi-gear text-secondary"></i> Settings
+                            </a>
+                        </li>
+                        <li>
+                            <hr class="dropdown-divider my-2">
+                        </li>
+                        <li>
+                            <button class="dropdown-item d-flex align-items-center gap-2 py-2 text-danger" type="button"
+                                (click)="logout()">
+                                <i class="bi bi-box-arrow-right"></i> Sign Out
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>

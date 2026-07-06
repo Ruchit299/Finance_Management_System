@@ -1,1 +1,149 @@
 /* You can add global styles to this file, and also import other style files */
+
+/* Import Angular Material theme */
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
+@import "@ng-select/ng-select/themes/default.theme.css";
+
+/* ==========================================================================
+   Angular Material Form Field Custom Integration
+   ========================================================================== */
+.mat-mdc-form-field {
+  width: 100%;
+  font-family: inherit;
+}
+
+/* Custom styling to make mat-form-field fit perfectly with 38px Bootstrap inputs */
+.compact-datepicker {
+  margin-bottom: 0 !important;
+  display: block;
+
+  /* We override the form-field container to behave like a Bootstrap form-control */
+  .mat-mdc-text-field-wrapper {
+    height: 38px !important;
+    padding: 0 0.75rem !important;
+    background-color: #f8f9fa !important; /* Matches bg-light */
+    border: 1px solid #dee2e6 !important; /* Standard light Bootstrap border */
+    border-radius: 6px !important; /* Standard Bootstrap rounded-3 radius */
+    box-shadow: none !important;
+    display: flex !important;
+    align-items: center !important;
+    position: relative !important;
+    box-sizing: border-box !important;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out, background-color 0.15s ease-in-out !important;
+  }
+
+  /* Re-align border when focused or within focus */
+  &:focus-within .mat-mdc-text-field-wrapper {
+    border-color: #86b7fe !important;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
+    background-color: #ffffff !important;
+  }
+
+  /* Hide default Material notched outline, line-ripples, and background overlays */
+  .mdc-notched-outline,
+  .mdc-line-ripple,
+  .mat-mdc-form-field-focus-indicator,
+  .mdc-text-field__ripple {
+    display: none !important;
+  }
+
+  /* Hide the reserved subscript spacing at the bottom so it aligns vertically in flex containers */
+  .mat-mdc-form-field-subscript-wrapper {
+    display: none !important;
+  }
+
+  .mat-mdc-form-field-flex {
+    height: 100% !important;
+    width: 100% !important;
+    align-items: center !important;
+    display: flex !important;
+  }
+
+  .mat-mdc-form-field-infix {
+    padding: 0 !important;
+    min-height: auto !important;
+    height: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    flex: 1 1 auto !important;
+  }
+
+  input.mat-mdc-input-element {
+    height: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    font-size: 0.9rem !important;
+    line-height: 1.5 !important;
+    color: #212529 !important;
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    vertical-align: middle !important;
+  }
+
+  /* Align suffix icon button */
+  .mat-mdc-form-field-icon-suffix {
+    padding: 0 !important;
+    margin: 0 0 0 8px !important;
+    align-self: center !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    
+    .mat-mdc-icon-button {
+      width: 24px !important;
+      height: 24px !important;
+      padding: 0 !important;
+      color: #0d6efd !important; /* Bootstrap primary color */
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      
+      &:disabled {
+        color: #adb5bd !important; /* Muted/grayed out color matching disabled inputs */
+        cursor: not-allowed !important;
+      }
+
+      .mat-icon {
+        font-size: 16px !important;
+        width: 16px !important;
+        height: 16px !important;
+      }
+    }
+  }
+}
+
+/* ==========================================================================
+   Overlay Fixes for Modals
+   ========================================================================== */
+/* Fix Angular Material Datepicker overlays appearing behind Bootstrap modals */
+.cdk-overlay-container {
+  z-index: 2000 !important;
+}
+
+/* Custom ng-select styling to match Bootstrap rounded pills */
+.custom-period-select.ng-select {
+  .ng-select-container {
+    border-radius: 50px !important;
+    border: 1px solid #dee2e6 !important;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
+    min-height: 34px !important;
+    height: 34px !important;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+    
+    .ng-value-container {
+      padding-left: 4px !important;
+      
+      .ng-value {
+        color: #4f46e5 !important;
+        font-weight: 600 !important;
+      }
+    }
+  }
+  
+  &.ng-select-opened > .ng-select-container {
+    border-color: #86b7fe !important;
+  }
+}
+

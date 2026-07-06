@@ -1,0 +1,249 @@
+<!-- Header Section -->
+<div class="row align-items-center justify-content-between mb-4 g-3">
+  <div class="col-12 col-md-6">
+    <h1 class="h2 fw-bold text-dark mb-1">Investment Plans</h1>
+    <p class="text-secondary mb-0">Set your investment goals, monthly contributions, and maturity dates.</p>
+  </div>
+  <div class="col-12 col-md-6 text-md-end">
+    <button (click)="openAddModal()" class="btn btn-primary btn-lg rounded-pill px-4 fw-semibold shadow-sm animate-hover">
+      <i class="bi bi-plus-lg me-2"></i>New Investment Plan
+    </button>
+  </div>
+</div>
+
+<!-- Global Alert Banners -->
+<div *ngIf="successMessage && !showFormModal" class="alert alert-success border-0 shadow-sm rounded-3 p-3 mb-4 alert-dismissible fade show" role="alert">
+  <i class="bi bi-check-circle-fill me-2"></i>{{ successMessage }}
+  <button type="button" class="btn-close shadow-none" (click)="successMessage = null" aria-label="Close"></button>
+</div>
+<div *ngIf="errorMessage && !showFormModal" class="alert alert-danger border-0 shadow-sm rounded-3 p-3 mb-4 alert-dismissible fade show" role="alert">
+  <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ errorMessage }}
+  <button type="button" class="btn-close shadow-none" (click)="errorMessage = null" aria-label="Close"></button>
+</div>
+
+<!-- Investments List -->
+<div class="card border-0 shadow-sm rounded-3 p-4">
+  <div *ngIf="isLoading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="text-secondary mt-2 small">Retrieving investment plans...</p>
+  </div>
+
+  <div *ngIf="!isLoading && investments.length === 0" class="text-center py-5">
+    <i class="bi bi-graph-up-arrow fs-1 text-secondary opacity-50"></i>
+    <h5 class="fw-bold text-dark mt-3">No Investment Plans Found</h5>
+    <p class="text-secondary small mb-0">Start by adding a new mutual fund, stock account, or recurring deposit plan.</p>
+  </div>
+
+  <div class="table-responsive" *ngIf="!isLoading && investments.length > 0">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th class="border-0 rounded-start text-secondary small fw-semibold">Plan Details</th>
+          <th class="border-0 text-secondary small fw-semibold">Category</th>
+          <th class="border-0 text-secondary small fw-semibold">Payment Method</th>
+          <th class="border-0 text-secondary small fw-semibold text-end">Monthly Contribution</th>
+          <th class="border-0 text-secondary small fw-semibold text-end">Expected Target</th>
+          <th class="border-0 text-secondary small fw-semibold text-center">Status</th>
+          <th class="border-0 rounded-end text-secondary small fw-semibold text-center">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of investments">
+          <!-- Plan Details -->
+          <td>
+            <div class="fw-bold text-dark mb-0">{{ item.name }}</div>
+            <div class="small text-secondary fw-medium">
+              Duration: {{ item.startDate | date:'mediumDate' }} — {{ item.maturityDate | date:'mediumDate' }}
+            </div>
+            <div *ngIf="item.notes" class="small text-muted fst-italic text-truncate" style="max-width: 250px;">
+              {{ item.notes }}
+            </div>
+          </td>
+          
+          <!-- Category -->
+          <td>
+            <span class="badge bg-light text-dark border rounded-pill px-2.5 py-1.5 small fw-medium">
+              {{ item.Category?.name || '-' }}
+            </span>
+          </td>
+
+          <!-- Payment Method -->
+          <td>
+            <span class="badge bg-light text-dark border px-2.5 py-1.5 rounded-pill small fw-medium">
+              {{ item.paymentMethod || 'Cash' }}
+            </span>
+          </td>
+          
+          <!-- Monthly Contribution -->
+          <td class="fw-bold text-end text-primary">
+            ₹{{ item.amount | number:'1.2-2' }}
+          </td>
+
+          <!-- Target Return -->
+          <td class="fw-bold text-end text-success">
+            ₹{{ item.targetAmount | number:'1.2-2' }}
+          </td>
+          
+          <!-- Status -->
+          <td class="text-center">
+            <span class="badge px-2.5 py-1.5 rounded-pill small fw-medium d-inline-flex align-items-center gap-1"
+                  [ngClass]="{
+                    'bg-primary-subtle text-primary border border-primary-subtle': item.status === 'Active',
+                    'bg-success-subtle text-success border border-success-subtle': item.status === 'Matured',
+                    'bg-secondary-subtle text-secondary border border-secondary-subtle': item.status === 'Completed'
+                  }">
+              <i class="bi" [ngClass]="{
+                'bi-play-circle-fill': item.status === 'Active',
+                'bi-check-circle-fill': item.status === 'Matured',
+                'bi-check2-all': item.status === 'Completed'
+              }"></i>
+              {{ item.status }}
+            </span>
+          </td>
+
+          <!-- Actions -->
+          <td class="text-center">
+            <div class="d-flex align-items-center justify-content-center gap-2">
+              <button *ngIf="item.status === 'Active'" (click)="recordManualContribution(item)" class="btn btn-outline-success btn-sm p-2 rounded-3" title="Pay Contribution">
+                <i class="bi bi-wallet2"></i>
+              </button>
+              <button (click)="openEditModal(item)" class="btn btn-outline-secondary btn-sm p-2 rounded-3" title="Edit">
+                <i class="bi bi-pencil-square"></i>
+              </button>
+              <button (click)="deleteInvestment(item.id)" class="btn btn-outline-danger btn-sm p-2 rounded-3" title="Delete">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Add/Edit Custom Modal Backdrop -->
+<div *ngIf="showFormModal" class="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50 d-flex align-items-center justify-content-center z-3 animate-fade-in">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+        <div class="card border-0 shadow-lg rounded-4 p-4 animate-scale-up">
+          <!-- Modal Header -->
+          <div class="d-flex align-items-center justify-content-between mb-4 border-bottom pb-2">
+            <h4 class="fw-bold text-dark mb-0">{{ isEditing ? 'Edit Investment' : 'New Investment Plan' }}</h4>
+            <button (click)="closeModal()" class="btn-close shadow-none" type="button" aria-label="Close"></button>
+          </div>
+
+          <!-- Alert Messages -->
+          <div *ngIf="errorMessage" class="alert alert-danger py-2 small mb-3" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ errorMessage }}
+          </div>
+          <div *ngIf="successMessage" class="alert alert-success py-2 small mb-3" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>{{ successMessage }}
+          </div>
+
+          <!-- Modal Body / Form -->
+          <form [formGroup]="investmentForm" (ngSubmit)="saveInvestment()">
+            <!-- Name Input -->
+            <div class="mb-3">
+              <label for="name" class="form-label small fw-semibold text-secondary">Plan / Account Name</label>
+              <input type="text" id="name" formControlName="name" placeholder="e.g. HDFC Nifty 50 Index Fund" class="form-control bg-light py-2" required>
+              <div *ngIf="investmentForm.get('name')?.touched && investmentForm.get('name')?.invalid" class="text-danger small mt-1">
+                Name is required.
+              </div>
+            </div>
+
+            <div class="row g-2 mb-3">
+              <!-- Monthly Contribution -->
+              <div class="col-6">
+                <label for="amount" class="form-label small fw-semibold text-secondary">Monthly Contribution (₹)</label>
+                <input type="number" id="amount" formControlName="amount" placeholder="0.00" class="form-control bg-light py-2" required>
+                <div *ngIf="investmentForm.get('amount')?.touched && investmentForm.get('amount')?.invalid" class="text-danger small mt-1">
+                  Value must be > 0.
+                </div>
+              </div>
+
+              <!-- Target Return -->
+              <div class="col-6">
+                <label for="targetAmount" class="form-label small fw-semibold text-secondary">Expected Return (₹)</label>
+                <input type="number" id="targetAmount" formControlName="targetAmount" placeholder="0.00" class="form-control bg-light py-2" required>
+                <div *ngIf="investmentForm.get('targetAmount')?.touched && investmentForm.get('targetAmount')?.invalid" class="text-danger small mt-1">
+                  Value must be > 0.
+                </div>
+              </div>
+            </div>
+
+            <!-- Category, Payment Method & Status -->
+            <div class="row g-2 mb-3">
+              <!-- Category -->
+              <div class="col-4">
+                <label for="categoryId" class="form-label small fw-semibold text-secondary">Category</label>
+                <select id="categoryId" formControlName="categoryId" class="form-select bg-light py-2" required>
+                  <option *ngFor="let cat of categories" [value]="cat.id">{{ cat.name }}</option>
+                </select>
+              </div>
+
+              <!-- Payment Method -->
+              <div class="col-4">
+                <label for="paymentMethod" class="form-label small fw-semibold text-secondary">Payment Method</label>
+                <select id="paymentMethod" formControlName="paymentMethod" class="form-select bg-light py-2" required>
+                  <option value="Cash">Cash</option>
+                  <option value="UPI">UPI</option>
+                  <option value="Online">Online</option>
+                </select>
+              </div>
+
+              <!-- Status -->
+              <div class="col-4">
+                <label for="status" class="form-label small fw-semibold text-secondary">Status</label>
+                <select id="status" formControlName="status" class="form-select bg-light py-2" required>
+                  <option value="Active">Active</option>
+                  <option value="Matured">Matured</option>
+                  <option value="Completed">Completed</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Start Date & Maturity Date -->
+            <div class="row g-2 mb-3">
+              <!-- Start Date -->
+              <div class="col-6">
+                <label class="form-label small fw-semibold text-secondary">Start Date</label>
+                <mat-form-field class="w-100 compact-datepicker">
+                  <input matInput [matDatepicker]="startPicker" formControlName="startDate" required placeholder="Choose Date">
+                  <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
+                  <mat-datepicker #startPicker></mat-datepicker>
+                </mat-form-field>
+              </div>
+
+              <!-- Maturity Date -->
+              <div class="col-6">
+                <label class="form-label small fw-semibold text-secondary">Maturity Date</label>
+                <mat-form-field class="w-100 compact-datepicker">
+                  <input matInput [matDatepicker]="maturityPicker" formControlName="maturityDate" required placeholder="Choose Date">
+                  <mat-datepicker-toggle matIconSuffix [for]="maturityPicker"></mat-datepicker-toggle>
+                  <mat-datepicker #maturityPicker></mat-datepicker>
+                </mat-form-field>
+              </div>
+            </div>
+
+            <!-- Notes -->
+            <div class="mb-4">
+              <label for="notes" class="form-label small fw-semibold text-secondary">Notes / Description</label>
+              <textarea id="notes" formControlName="notes" placeholder="e.g. locked-in period details, account IDs..." class="form-control bg-light py-2" rows="2"></textarea>
+            </div>
+
+            <!-- Actions -->
+            <div class="d-flex justify-content-end gap-2 border-top pt-3">
+              <button (click)="closeModal()" type="button" class="btn btn-outline-secondary px-4 py-2 rounded-3 fw-semibold">Cancel</button>
+              <button type="submit" class="btn btn-primary px-4 py-2 rounded-3 fw-semibold">
+                {{ isEditing ? 'Save Changes' : 'Create Plan' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
