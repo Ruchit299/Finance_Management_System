@@ -4,7 +4,7 @@ FROM node:22-alpine AS builder
 WORKDIR /usr/src/app
 
 # Copy package configurations
-COPY package*.json ./
+COPY package.json package-lock.json ./
 
 # Install build dependencies required for compiling native modules like bcrypt
 RUN apk add --no-cache python3 make g++
@@ -29,7 +29,7 @@ ENV NODE_ENV=production
 ENV PORT=8086
 
 # Copy package configurations
-COPY package*.json ./
+COPY package.json package-lock.json ./
 
 # Install build dependencies required for compiling native modules like bcrypt
 RUN apk add --no-cache --virtual .build-deps python3 make g++ \
