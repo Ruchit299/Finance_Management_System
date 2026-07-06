@@ -4,7 +4,7 @@ FROM node:22-alpine AS builder
 WORKDIR /usr/src/app
 
 # Copy package configurations
-COPY package.json package-lock.json ./
+COPY PFT_Management_System_BKD/package.json PFT_Management_System_BKD/package-lock.json ./
 
 # Install build dependencies required for compiling native modules like bcrypt
 RUN apk add --no-cache python3 make g++
@@ -13,7 +13,7 @@ RUN apk add --no-cache python3 make g++
 RUN npm install --force
 
 # Copy the rest of the application files
-COPY . .
+COPY PFT_Management_System_BKD/ .
 
 # Compile TypeScript to JavaScript
 RUN npm run build
@@ -29,7 +29,7 @@ ENV NODE_ENV=production
 ENV PORT=8086
 
 # Copy package configurations
-COPY package.json package-lock.json ./
+COPY PFT_Management_System_BKD/package.json PFT_Management_System_BKD/package-lock.json ./
 
 # Install build dependencies required for compiling native modules like bcrypt
 RUN apk add --no-cache --virtual .build-deps python3 make g++ \
