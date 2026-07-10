@@ -58,9 +58,9 @@
                         <div class="d-flex gap-2">
                             <button type="submit"
                                 class="btn btn-primary flex-grow-1 rounded-pill py-2 fw-bold shadow-sm"
-                                [disabled]="!newCategoryName.trim() || isLoading">
+                                [disabled]="!newCategoryName.trim() || isLoading || isSaving">
                                 <i class="bi" [ngClass]="isEditing ? 'bi-check-lg' : 'bi-plus-lg'"></i>
-                                {{ isLoading ? 'Saving...' : (isEditing ? 'Update Category' : 'Add Category') }}
+                                {{ (isLoading || isSaving) ? 'Saving...' : (isEditing ? 'Update Category' : 'Add Category') }}
                             </button>
                             <button *ngIf="isEditing" type="button"
                                 class="btn btn-light border rounded-pill py-2 fw-bold" (click)="resetForm()">

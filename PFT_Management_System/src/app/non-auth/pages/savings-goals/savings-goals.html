@@ -165,7 +165,7 @@
 
                     <div class="d-flex gap-2 justify-content-end mt-3">
                         <button type="button" class="btn btn-light" (click)="closeModals()">Cancel</button>
-                        <button type="button" class="btn btn-success px-4" id="btn-save-goal" (click)="saveGoal()">
+                        <button type="button" class="btn btn-success px-4" id="btn-save-goal" (click)="saveGoal()" [disabled]="isSaving">
                             {{ isEditing ? 'Update Goal' : 'Create Goal' }}
                         </button>
                     </div>
@@ -201,7 +201,7 @@
                     </div>
                     <div class="d-flex gap-2 justify-content-end">
                         <button type="button" class="btn btn-light" (click)="closeModals()">Cancel</button>
-                        <button type="button" class="btn btn-success px-4" id="btn-save-deposit" (click)="addDeposit()">
+                        <button type="button" class="btn btn-success px-4" id="btn-save-deposit" (click)="addDeposit()" [disabled]="isSaving">
                             Add Money
                         </button>
                     </div>

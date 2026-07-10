@@ -29,6 +29,32 @@ export class Transaction implements OnInit {
   errorMessage: string | null = null;
   successMessage: string | null = null;
   isLoading = false;
+  isFiltersExpanded = false;
+  isSaving = false;
+
+  // Pagination
+  currentPage = 1;
+  pageSize = 10;
+  Math = Math;
+
+  get paginatedTransactions(): any[] {
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    return this.transactions.slice(startIndex, startIndex + this.pageSize);
+  }
+
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.transactions.length / this.pageSize));
+  }
+
+  changePage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+    }
+  }
+
+  toggleFilters(): void {
+    this.isFiltersExpanded = !this.isFiltersExpanded;
+  }
 
   // Import States
   isImporting = false;
@@ -110,6 +136,7 @@ export class Transaction implements OnInit {
       next: (res) => {
         this.isLoading = false;
         this.transactions = res.result || [];
+        this.currentPage = 1;
       },
       error: (err) => {
         this.isLoading = false;
@@ -167,14 +194,16 @@ export class Transaction implements OnInit {
     this.showFormModal = false;
     this.errorMessage = null;
     this.successMessage = null;
+    this.isSaving = false;
   }
 
   saveTransaction(): void {
-    if (this.transactionForm.invalid) {
-      this.transactionForm.markAllAsTouched();
+    if (this.transactionForm.invalid || this.isSaving) {
+      if (this.transactionForm.invalid) this.transactionForm.markAllAsTouched();
       return;
     }
 
+    this.isSaving = true;
     const payload = this.transactionForm.value;
     this.errorMessage = null;
     this.successMessage = null;
@@ -187,6 +216,7 @@ export class Transaction implements OnInit {
           setTimeout(() => this.closeModal(), 1500);
         },
         error: (err) => {
+          this.isSaving = false;
           this.errorMessage = err.error?.error || err.error?.message || 'Failed to update transaction';
         }
       });
@@ -198,6 +228,7 @@ export class Transaction implements OnInit {
           setTimeout(() => this.closeModal(), 1500);
         },
         error: (err) => {
+          this.isSaving = false;
           this.errorMessage = err.error?.error || err.error?.message || 'Failed to create transaction';
         }
       });

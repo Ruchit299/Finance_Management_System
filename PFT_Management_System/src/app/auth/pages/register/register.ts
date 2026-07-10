@@ -16,6 +16,11 @@ export class Register {
   errorMessage: string | null = null;
   successMessage: string | null = null;
   isLoading = false;
+  showPassword = false;
+
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
+  }
 
   constructor(
     private fb: FormBuilder,

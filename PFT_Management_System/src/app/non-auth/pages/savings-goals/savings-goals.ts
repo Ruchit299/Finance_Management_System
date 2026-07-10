@@ -25,6 +25,7 @@ export class SavingsGoalsComponent implements OnInit {
   isEditing = false;
   selectedGoalId: number | null = null;
   isLoading = false;
+  isSaving = false;
   errorMessage: string | null = null;
   successMessage: string | null = null;
 
@@ -68,9 +69,12 @@ export class SavingsGoalsComponent implements OnInit {
   openAddModal(): void {
     this.isEditing = false;
     this.selectedGoalId = null;
-    this.goalForm.reset();
-    this.errorMessage = null;
-    this.successMessage = null;
+    this.goalForm.reset({
+      name: '',
+      description: '',
+      targetAmount: null,
+      targetDate: this.today,
+    });
     this.showGoalModal = true;
   }
 
@@ -79,20 +83,16 @@ export class SavingsGoalsComponent implements OnInit {
     this.selectedGoalId = goal.id;
     this.goalForm.patchValue({
       name: goal.name,
-      description: goal.description,
+      description: goal.description || '',
       targetAmount: goal.targetAmount,
       targetDate: goal.targetDate,
     });
-    this.errorMessage = null;
-    this.successMessage = null;
     this.showGoalModal = true;
   }
 
   openDepositModal(goal: any): void {
     this.selectedGoalId = goal.id;
-    this.depositForm.reset();
-    this.errorMessage = null;
-    this.successMessage = null;
+    this.depositForm.reset({ amount: null });
     this.showDepositModal = true;
   }
 
@@ -101,14 +101,16 @@ export class SavingsGoalsComponent implements OnInit {
     this.showDepositModal = false;
     this.errorMessage = null;
     this.successMessage = null;
+    this.isSaving = false;
   }
 
   saveGoal(): void {
-    if (this.goalForm.invalid) {
-      this.goalForm.markAllAsTouched();
+    if (this.goalForm.invalid || this.isSaving) {
+      if (this.goalForm.invalid) this.goalForm.markAllAsTouched();
       return;
     }
 
+    this.isSaving = true;
     const payload = this.goalForm.value;
     this.errorMessage = null;
     this.successMessage = null;
@@ -121,6 +123,7 @@ export class SavingsGoalsComponent implements OnInit {
           setTimeout(() => this.closeModals(), 1500);
         },
         error: (err) => {
+          this.isSaving = false;
           this.errorMessage = err.error?.error || err.error?.message || 'Failed to update';
         },
       });
@@ -132,6 +135,7 @@ export class SavingsGoalsComponent implements OnInit {
           setTimeout(() => this.closeModals(), 1500);
         },
         error: (err) => {
+          this.isSaving = false;
           this.errorMessage = err.error?.error || err.error?.message || 'Failed to create';
         },
       });
@@ -139,11 +143,12 @@ export class SavingsGoalsComponent implements OnInit {
   }
 
   addDeposit(): void {
-    if (this.depositForm.invalid || !this.selectedGoalId) {
-      this.depositForm.markAllAsTouched();
+    if (this.depositForm.invalid || !this.selectedGoalId || this.isSaving) {
+      if (this.depositForm.invalid) this.depositForm.markAllAsTouched();
       return;
     }
 
+    this.isSaving = true;
     const { amount } = this.depositForm.value;
     this.savingsService.addSavings(this.selectedGoalId, amount).subscribe({
       next: () => {
@@ -152,6 +157,7 @@ export class SavingsGoalsComponent implements OnInit {
         setTimeout(() => this.closeModals(), 1500);
       },
       error: (err) => {
+        this.isSaving = false;
         this.errorMessage = err.error?.error || err.error?.message || 'Failed to add savings';
       },
     });

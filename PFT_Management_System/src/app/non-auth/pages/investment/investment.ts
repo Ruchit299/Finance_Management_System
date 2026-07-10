@@ -28,6 +28,7 @@ export class InvestmentComponent implements OnInit {
   errorMessage: string | null = null;
   successMessage: string | null = null;
   isLoading = false;
+  isSaving = false;
 
   today = new Date().toISOString().split('T')[0];
 
@@ -129,11 +130,12 @@ export class InvestmentComponent implements OnInit {
     this.showFormModal = false;
     this.errorMessage = null;
     this.successMessage = null;
+    this.isSaving = false;
   }
 
   saveInvestment(): void {
-    if (this.investmentForm.invalid) {
-      this.investmentForm.markAllAsTouched();
+    if (this.investmentForm.invalid || this.isSaving) {
+      if (this.investmentForm.invalid) this.investmentForm.markAllAsTouched();
       return;
     }
 
@@ -145,6 +147,7 @@ export class InvestmentComponent implements OnInit {
       return;
     }
 
+    this.isSaving = true;
     const payload = {
       ...formVal,
       startDate: this.formatDateToYYYYMMDD(formVal.startDate),
@@ -162,6 +165,7 @@ export class InvestmentComponent implements OnInit {
           setTimeout(() => this.closeModal(), 1500);
         },
         error: (err) => {
+          this.isSaving = false;
           this.errorMessage = err.error?.error || err.error?.message || 'Failed to update investment';
         }
       });
@@ -173,6 +177,7 @@ export class InvestmentComponent implements OnInit {
           setTimeout(() => this.closeModal(), 1500);
         },
         error: (err) => {
+          this.isSaving = false;
           this.errorMessage = err.error?.error || err.error?.message || 'Failed to create investment';
         }
       });

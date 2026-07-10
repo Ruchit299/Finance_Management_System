@@ -24,6 +24,7 @@ export class BillRemindersComponent implements OnInit {
   isEditing = false;
   selectedId: number | null = null;
   isLoading = false;
+  isSaving = false;
   errorMessage: string | null = null;
   successMessage: string | null = null;
 
@@ -114,13 +115,15 @@ export class BillRemindersComponent implements OnInit {
     this.showModal = false;
     this.errorMessage = null;
     this.successMessage = null;
+    this.isSaving = false;
   }
 
   save(): void {
-    if (this.billForm.invalid) {
-      this.billForm.markAllAsTouched();
+    if (this.billForm.invalid || this.isSaving) {
+      if (this.billForm.invalid) this.billForm.markAllAsTouched();
       return;
     }
+    this.isSaving = true;
     const payload = this.billForm.value;
 
     if (this.isEditing && this.selectedId) {
@@ -131,6 +134,7 @@ export class BillRemindersComponent implements OnInit {
           setTimeout(() => this.closeModal(), 1500);
         },
         error: (err) => {
+          this.isSaving = false;
           this.errorMessage = err.error?.error || err.error?.message || 'Failed to update';
         },
       });
@@ -142,6 +146,7 @@ export class BillRemindersComponent implements OnInit {
           setTimeout(() => this.closeModal(), 1500);
         },
         error: (err) => {
+          this.isSaving = false;
           this.errorMessage = err.error?.error || err.error?.message || 'Failed to create';
         },
       });

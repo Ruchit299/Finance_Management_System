@@ -194,7 +194,7 @@
                     <div class="d-flex gap-2 justify-content-end mt-3">
                         <button type="button" class="btn btn-light" (click)="closeModal()">Cancel</button>
                         <button type="button" class="btn btn-warning px-4 fw-semibold" id="btn-save-bill"
-                            (click)="save()">
+                            (click)="save()" [disabled]="isSaving">
                             {{ isEditing ? 'Update' : 'Add Reminder' }}
                         </button>
                     </div>

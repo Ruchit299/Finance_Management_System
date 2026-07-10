@@ -202,7 +202,7 @@
 
                     <div class="d-flex gap-2 justify-content-end mt-3">
                         <button type="button" class="btn btn-light" (click)="closeModal()">Cancel</button>
-                        <button type="button" class="btn btn-primary px-4" id="btn-save-recurring" (click)="save()">
+                        <button type="button" class="btn btn-primary px-4" id="btn-save-recurring" (click)="save()" [disabled]="isSaving">
                             {{ isEditing ? 'Update' : 'Create' }}
                         </button>
                     </div>

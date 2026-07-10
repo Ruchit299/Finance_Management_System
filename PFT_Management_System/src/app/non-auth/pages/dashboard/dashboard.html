@@ -1,4 +1,4 @@
-<div class="container-fluid py-4 px-4">
+<div class="container-fluid py-4 px-3 px-md-4">
 
   <!-- ── Page Header ───────────────────────────────────────────── -->
   <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
@@ -372,9 +372,10 @@
     <!-- ── Bottom Section ─────────────────────────────────────────── -->
     <div class="row g-4">
 
-      <!-- Budget Utilization -->
+      <!-- Column 1: Budget Status & Investment Plans -->
       <div *ngIf="timeframe !== 'alltime'" class="col-12 col-lg-4">
-        <div class="card border-0 shadow-sm rounded-4 h-100">
+        <!-- Budget Status -->
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
           <div class="card-body p-4">
             <div class="d-flex justify-content-between align-items-center mb-3">
               <h5 class="fw-bold mb-0">Budget Status</h5>
@@ -409,53 +410,9 @@
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Savings Goals -->
-      <div class="col-12" [ngClass]="timeframe === 'alltime' ? 'col-lg-6' : 'col-lg-4'">
-        <div class="card border-0 shadow-sm rounded-4 h-100">
-          <div class="card-body p-4">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <h5 class="fw-bold mb-0">Savings Goals</h5>
-              <a routerLink="/savings-goals" class="btn btn-sm btn-outline-success rounded-pill">View All</a>
-            </div>
-
-            <div *ngIf="savingsGoals.length === 0" class="text-center py-3">
-              <i class="bi bi-piggy-bank display-4 text-muted opacity-25"></i>
-              <p class="text-muted small mt-2">No savings goals created yet</p>
-              <a routerLink="/savings-goals" class="btn btn-sm btn-success">Create Goal</a>
-            </div>
-
-            <div class="d-flex flex-column gap-3" *ngIf="savingsGoals.length > 0">
-              <div *ngFor="let g of savingsGoals">
-                <div class="d-flex justify-content-between align-items-center mb-1">
-                  <div>
-                    <span class="small fw-semibold">{{ g.name }}</span>
-                    <span *ngIf="g.isCompleted" class="badge bg-success-subtle text-success ms-2"
-                      style="font-size:0.65rem;">✅ Done</span>
-                  </div>
-                  <span class="small fw-bold" [style.color]="getProgressColor(g.percent)">
-                    {{ g.percent }}%
-                  </span>
-                </div>
-                <div class="progress" style="height: 8px; border-radius: 6px;">
-                  <div class="progress-bar" [style.width.%]="g.percent > 100 ? 100 : g.percent"
-                    [style.background-color]="getProgressColor(g.percent)"
-                    style="border-radius: 6px; transition: width 0.4s ease;">
-                  </div>
-                </div>
-                <div class="d-flex justify-content-between mt-1">
-                  <span class="text-muted" style="font-size:0.7rem;">₹{{ g.savedAmount | number:'1.0-0' }} saved</span>
-                  <span class="text-muted" style="font-size:0.7rem;">Target: ₹{{ g.targetAmount | number:'1.0-0'
-                    }}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Investment Plans Widget -->
-        <div class="card border-0 shadow-sm rounded-4 mt-4 animate-fade-in">
+        <!-- Investment Plans (Normal view) -->
+        <div class="card border-0 shadow-sm rounded-4 animate-fade-in">
           <div class="card-body p-4">
             <div class="d-flex justify-content-between align-items-center mb-3">
               <h5 class="fw-bold mb-0">Investment Plans</h5>
@@ -495,8 +452,131 @@
         </div>
       </div>
 
-      <!-- Bills & Recent Transactions -->
+      <!-- Column 2: Savings Goals & Payment Modes / Investment Plans -->
       <div class="col-12" [ngClass]="timeframe === 'alltime' ? 'col-lg-6' : 'col-lg-4'">
+        <!-- Savings Goals -->
+        <div class="card border-0 shadow-sm rounded-4 mb-4">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="fw-bold mb-0">Savings Goals</h5>
+              <a routerLink="/savings-goals" class="btn btn-sm btn-outline-success rounded-pill">View All</a>
+            </div>
+
+            <div *ngIf="savingsGoals.length === 0" class="text-center py-3">
+              <i class="bi bi-piggy-bank display-4 text-muted opacity-25"></i>
+              <p class="text-muted small mt-2">No savings goals created yet</p>
+              <a routerLink="/savings-goals" class="btn btn-sm btn-success">Create Goal</a>
+            </div>
+
+            <div class="d-flex flex-column gap-3" *ngIf="savingsGoals.length > 0">
+              <div *ngFor="let g of savingsGoals">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                  <div>
+                    <span class="small fw-semibold">{{ g.name }}</span>
+                    <span *ngIf="g.isCompleted" class="badge bg-success-subtle text-success ms-2"
+                      style="font-size:0.65rem;">✅ Done</span>
+                  </div>
+                  <span class="small fw-bold" [style.color]="getProgressColor(g.percent)">
+                    {{ g.percent }}%
+                  </span>
+                </div>
+                <div class="progress" style="height: 8px; border-radius: 6px;">
+                  <div class="progress-bar" [style.width.%]="g.percent > 100 ? 100 : g.percent"
+                    [style.background-color]="getProgressColor(g.percent)"
+                    style="border-radius: 6px; transition: width 0.4s ease;">
+                  </div>
+                </div>
+                <div class="d-flex justify-content-between mt-1">
+                  <span class="text-muted" style="font-size:0.7rem;">₹{{ g.savedAmount | number:'1.0-0' }} saved</span>
+                  <span class="text-muted" style="font-size:0.7rem;">Target: ₹{{ g.targetAmount | number:'1.0-0' }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payment Modes (Normal view) -->
+        <div *ngIf="timeframe !== 'alltime'" class="card border-0 shadow-sm rounded-4 animate-fade-in">
+          <div class="card-body p-4">
+            <h5 class="fw-bold mb-1">Payment Modes</h5>
+            <p class="text-muted small mb-3">Expenses by payment method</p>
+
+            <div class="d-flex flex-column gap-3">
+              <div *ngFor="let pm of paymentMethodBreakdown">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                  <span class="small fw-semibold d-flex align-items-center gap-2">
+                    <i class="bi fs-5" [ngClass]="{
+                      'bi-cash-coin text-info': pm.method === 'Cash',
+                      'bi-phone text-primary': pm.method === 'UPI',
+                      'bi-credit-card text-warning': pm.method === 'Online'
+                    }"></i>
+                    {{ pm.method }}
+                  </span>
+                  <span class="small text-muted fw-semibold">{{ pm.percent }}%</span>
+                </div>
+                <div class="progress" style="height: 6px; border-radius: 4px;">
+                  <div class="progress-bar"
+                       [style.width.%]="pm.percent"
+                       [ngClass]="{
+                         'bg-info': pm.method === 'Cash',
+                         'bg-primary': pm.method === 'UPI',
+                         'bg-warning': pm.method === 'Online'
+                       }"
+                       style="border-radius: 4px; transition: width 0.4s ease;">
+                  </div>
+                </div>
+                <div class="d-flex justify-content-between mt-1">
+                  <span class="text-muted" style="font-size: 0.7rem;">₹{{ pm.amount | number:'1.0-0' }} spent</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Investment Plans (All time fallback) -->
+        <div *ngIf="timeframe === 'alltime'" class="card border-0 shadow-sm rounded-4 animate-fade-in">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h5 class="fw-bold mb-0">Investment Plans</h5>
+              <a routerLink="/investments" class="btn btn-sm btn-outline-info rounded-pill">View All</a>
+            </div>
+
+            <div *ngIf="investments.length === 0" class="text-center py-3">
+              <i class="bi bi-graph-up-arrow display-4 text-muted opacity-25"></i>
+              <p class="text-muted small mt-2">No active investments found</p>
+              <a routerLink="/investments" class="btn btn-sm btn-info text-white">Create Plan</a>
+            </div>
+
+            <div class="d-flex flex-column gap-3" *ngIf="investments.length > 0">
+              <div *ngFor="let inv of investments">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                  <div>
+                    <span class="small fw-semibold">{{ inv.name }}</span>
+                    <span class="badge bg-light text-dark border ms-2" style="font-size:0.6rem;">{{ inv.category }}</span>
+                  </div>
+                  <span class="small fw-bold text-primary">
+                    {{ inv.percent }}%
+                  </span>
+                </div>
+                <div class="progress" style="height: 8px; border-radius: 6px;">
+                  <div class="progress-bar bg-primary"
+                       [style.width.%]="inv.percent > 100 ? 100 : inv.percent"
+                       style="border-radius: 6px; transition: width 0.4s ease;">
+                  </div>
+                </div>
+                <div class="d-flex justify-content-between mt-1">
+                  <span class="text-muted" style="font-size:0.7rem;">₹{{ inv.totalContributed | number:'1.0-0' }} contributed</span>
+                  <span class="text-muted" style="font-size:0.7rem;">Target: ₹{{ inv.targetAmount | number:'1.0-0' }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Column 3: Upcoming Bills & Recent Transactions / Payment Modes -->
+      <div class="col-12" [ngClass]="timeframe === 'alltime' ? 'col-lg-6' : 'col-lg-4'">
+        <!-- Upcoming Bills -->
         <div class="card border-0 shadow-sm rounded-4 mb-4">
           <div class="card-body p-4">
             <div class="d-flex justify-content-between align-items-center mb-3">
@@ -530,8 +610,8 @@
           </div>
         </div>
 
-        <!-- Payment Methods Breakdown -->
-        <div class="card border-0 shadow-sm rounded-4 mb-4 animate-fade-in">
+        <!-- Payment Modes (All time fallback) -->
+        <div *ngIf="timeframe === 'alltime'" class="card border-0 shadow-sm rounded-4 mb-4 animate-fade-in">
           <div class="card-body p-4">
             <h5 class="fw-bold mb-1">Payment Modes</h5>
             <p class="text-muted small mb-3">Expenses by payment method</p>

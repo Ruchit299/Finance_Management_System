@@ -9,7 +9,7 @@
               class="col-md-6 bg-primary bg-gradient d-none d-md-flex flex-column justify-content-between p-5 text-white">
               <div>
                 <div class="d-flex align-items-center mb-5">
-                  <i class="bi bi-bank fs-2 me-2"></i>
+                  <img src="favicon.ico" alt="Logo" style="height: 32px; width: 32px;" class="me-2">
                   <span class="fs-4 fw-bold">PFT Portal</span>
                 </div>
                 <h1 class="display-6 fw-bold mb-3">Finance Management System</h1>
@@ -30,7 +30,7 @@
             <div class="col-md-6 p-4 p-md-5 bg-white">
               <div class="mb-4">
                 <div class="d-md-none d-flex align-items-center mb-4 text-primary">
-                  <i class="bi bi-bank fs-2 me-2"></i>
+                  <img src="favicon.ico" alt="Logo" style="height: 32px; width: 32px;" class="me-2">
                   <span class="fs-4 fw-bold">PFT Portal</span>
                 </div>
                 <h2 class="fw-bold text-dark">Welcome Back</h2>
@@ -94,8 +94,11 @@
                   <div class="input-group">
                     <span class="input-group-text bg-light border-end-0 text-secondary"><i
                         class="bi bi-lock"></i></span>
-                    <input type="password" id="password" formControlName="password"
-                      class="form-control bg-light border-start-0 py-2" placeholder="••••••••" required>
+                    <input [type]="showPassword ? 'text' : 'password'" id="password" formControlName="password"
+                      class="form-control bg-light border-start-0 border-end-0 py-2" placeholder="••••••••" required>
+                    <button type="button" class="input-group-text bg-light border-start-0 text-secondary" (click)="togglePasswordVisibility()">
+                      <i class="bi" [ngClass]="showPassword ? 'bi-eye-slash' : 'bi-eye'"></i>
+                    </button>
                   </div>
                   <div *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.invalid"
                     class="text-danger small mt-1">

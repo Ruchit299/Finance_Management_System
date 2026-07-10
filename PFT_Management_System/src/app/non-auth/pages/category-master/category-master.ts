@@ -17,6 +17,7 @@ export class CategoryMasterComponent implements OnInit {
   isEditing = false;
   selectedCategoryId: number | null = null;
   isLoading = false;
+  isSaving = false;
   errorMessage: string | null = null;
   successMessage: string | null = null;
   selectedTab: 'transaction' | 'investment' = 'transaction';
@@ -52,10 +53,11 @@ export class CategoryMasterComponent implements OnInit {
   }
 
   saveCategory(): void {
-    if (!this.newCategoryName.trim()) {
+    if (!this.newCategoryName.trim() || this.isSaving) {
       return;
     }
 
+    this.isSaving = true;
     this.isLoading = true;
     if (this.isEditing && this.selectedCategoryId) {
       this.categoryService.update(this.selectedCategoryId, this.newCategoryName).subscribe({
@@ -66,6 +68,7 @@ export class CategoryMasterComponent implements OnInit {
           setTimeout(() => this.successMessage = null, 3000);
         },
         error: (err) => {
+          this.isSaving = false;
           this.isLoading = false;
           this.errorMessage = err.error?.message || 'Failed to update category';
           setTimeout(() => this.errorMessage = null, 3000);
@@ -80,6 +83,7 @@ export class CategoryMasterComponent implements OnInit {
           setTimeout(() => this.successMessage = null, 3000);
         },
         error: (err) => {
+          this.isSaving = false;
           this.isLoading = false;
           this.errorMessage = err.error?.message || 'Failed to create category';
           setTimeout(() => this.errorMessage = null, 3000);
@@ -128,5 +132,6 @@ export class CategoryMasterComponent implements OnInit {
     this.isEditing = false;
     this.selectedCategoryId = null;
     this.newCategoryName = '';
+    this.isSaving = false;
   }
 }

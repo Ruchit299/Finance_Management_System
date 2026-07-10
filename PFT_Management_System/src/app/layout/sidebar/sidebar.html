@@ -1,0 +1,82 @@
+<div class="sidebar d-flex flex-column flex-shrink-0 p-3 text-bg-dark border-end border-secondary shadow-sm" [class.toggled]="isToggled">
+  <!-- Brand logo/name -->
+  <div class="d-flex align-items-center justify-content-between mb-4 px-2">
+    <a class="d-flex align-items-center gap-2 text-white text-decoration-none fw-bold" routerLink="/dashboard">
+      <img src="favicon.ico" alt="Logo" style="height: 24px; width: 24px;">
+      <span class="fs-5">PFT Portal</span>
+    </a>
+    <button type="button" class="btn-close btn-close-white d-md-none" aria-label="Close" (click)="onLinkClick()"></button>
+  </div>
+
+  <hr class="opacity-25 my-2">
+
+  <!-- Nav links -->
+  <ul class="nav nav-pills flex-column mb-auto gap-1">
+    <li class="nav-item">
+      <a class="nav-link text-white opacity-75 d-flex align-items-center gap-3 py-2.5 px-3 rounded-3" routerLink="/dashboard"
+        routerLinkActive="active opacity-100 fw-semibold bg-primary" (click)="onLinkClick()">
+        <i class="bi bi-grid-1x2 fs-5"></i>
+        <span>Dashboard</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link text-white opacity-75 d-flex align-items-center gap-3 py-2.5 px-3 rounded-3" routerLink="/transactions"
+        routerLinkActive="active opacity-100 fw-semibold bg-primary" (click)="onLinkClick()">
+        <i class="bi bi-wallet2 fs-5"></i>
+        <span>Transactions</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link text-white opacity-75 d-flex align-items-center gap-3 py-2.5 px-3 rounded-3" routerLink="/budget"
+        routerLinkActive="active opacity-100 fw-semibold bg-primary" (click)="onLinkClick()">
+        <i class="bi bi-sliders fs-5"></i>
+        <span>Budget</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link text-white opacity-75 d-flex align-items-center gap-3 py-2.5 px-3 rounded-3" routerLink="/savings-goals"
+        routerLinkActive="active opacity-100 fw-semibold bg-primary" (click)="onLinkClick()">
+        <i class="bi bi-piggy-bank fs-5"></i>
+        <span>Savings Goals</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link text-white opacity-75 d-flex align-items-center gap-3 py-2.5 px-3 rounded-3" routerLink="/recurring-transactions"
+        routerLinkActive="active opacity-100 fw-semibold bg-primary" (click)="onLinkClick()">
+        <i class="bi bi-arrow-repeat fs-5"></i>
+        <span>Recurring</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link text-white opacity-75 d-flex align-items-center gap-3 py-2.5 px-3 rounded-3" routerLink="/bill-reminders"
+        routerLinkActive="active opacity-100 fw-semibold bg-primary" (click)="onLinkClick()">
+        <i class="bi bi-bell fs-5"></i>
+        <span>Bills</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link text-white opacity-75 d-flex align-items-center gap-3 py-2.5 px-3 rounded-3" routerLink="/categories"
+        routerLinkActive="active opacity-100 fw-semibold bg-primary" (click)="onLinkClick()">
+        <i class="bi bi-tags fs-5"></i>
+        <span>Categories</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link text-white opacity-75 d-flex align-items-center gap-3 py-2.5 px-3 rounded-3" routerLink="/investments"
+        routerLinkActive="active opacity-100 fw-semibold bg-primary" (click)="onLinkClick()">
+        <i class="bi bi-graph-up-arrow fs-5"></i>
+        <span>Investments</span>
+      </a>
+    </li>
+    <li class="nav-item" *ngIf="user?.isAdmin">
+      <a class="nav-link text-white opacity-75 d-flex align-items-center gap-3 py-2.5 px-3 rounded-3" routerLink="/users"
+        routerLinkActive="active opacity-100 fw-semibold bg-primary" (click)="onLinkClick()">
+        <i class="bi bi-people fs-5"></i>
+        <span>Users</span>
+      </a>
+    </li>
+  </ul>
+</div>
+
+<!-- Backdrop (Mobile view only) -->
+<div class="sidebar-backdrop d-md-none" [class.show]="isToggled" (click)="onLinkClick()"></div>

@@ -24,6 +24,7 @@ export class RecurringTransactionsComponent implements OnInit {
   isEditing = false;
   selectedId: number | null = null;
   isLoading = false;
+  isSaving = false;
   errorMessage: string | null = null;
   successMessage: string | null = null;
 
@@ -115,6 +116,7 @@ export class RecurringTransactionsComponent implements OnInit {
     this.showModal = false;
     this.errorMessage = null;
     this.successMessage = null;
+    this.isSaving = false;
   }
 
   formatDateToYYYYMMDD(date: any): string {
@@ -128,10 +130,11 @@ export class RecurringTransactionsComponent implements OnInit {
   }
 
   save(): void {
-    if (this.recurringForm.invalid) {
-      this.recurringForm.markAllAsTouched();
+    if (this.recurringForm.invalid || this.isSaving) {
+      if (this.recurringForm.invalid) this.recurringForm.markAllAsTouched();
       return;
     }
+    this.isSaving = true;
     const formVal = this.recurringForm.value;
     const payload = {
       ...formVal,
@@ -146,6 +149,7 @@ export class RecurringTransactionsComponent implements OnInit {
           setTimeout(() => this.closeModal(), 1500);
         },
         error: (err) => {
+          this.isSaving = false;
           this.errorMessage = err.error?.error || err.error?.message || 'Failed to update';
         },
       });
@@ -157,6 +161,7 @@ export class RecurringTransactionsComponent implements OnInit {
           setTimeout(() => this.closeModal(), 1500);
         },
         error: (err) => {
+          this.isSaving = false;
           this.errorMessage = err.error?.error || err.error?.message || 'Failed to create';
         },
       });

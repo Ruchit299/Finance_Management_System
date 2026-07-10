@@ -1,5 +1,5 @@
-import { Component, OnInit, HostListener } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { Component, OnInit, HostListener, Output, EventEmitter } from '@angular/core';
+import { Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../auth/services/auth.service';
 import { PwaService } from '../../shared/services/pwa';
@@ -7,10 +7,12 @@ import { PwaService } from '../../shared/services/pwa';
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive],
+  imports: [CommonModule, RouterLink],
   templateUrl: './header.html',
 })
 export class Header implements OnInit {
+  @Output() toggleSidebar = new EventEmitter<void>();
+
   user: any = null;
   isMenuCollapsed = true;
   isDropdownOpen = false;
@@ -23,6 +25,10 @@ export class Header implements OnInit {
 
   ngOnInit(): void {
     this.user = this.authService.getUser();
+  }
+
+  onToggleClick(): void {
+    this.toggleSidebar.emit();
   }
 
   toggleMenu(): void {

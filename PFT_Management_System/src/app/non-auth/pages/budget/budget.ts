@@ -56,6 +56,7 @@ export class BudgetComponent implements OnInit {
   errorMessage: string | null = null;
   successMessage: string | null = null;
   isLoading = false;
+  isSaving = false;
 
   // Categories list
   categories: any[] = [];
@@ -175,14 +176,16 @@ export class BudgetComponent implements OnInit {
     this.showFormModal = false;
     this.errorMessage = null;
     this.successMessage = null;
+    this.isSaving = false;
   }
 
   saveBudget(): void {
-    if (this.budgetForm.invalid) {
-      this.budgetForm.markAllAsTouched();
+    if (this.budgetForm.invalid || this.isSaving) {
+      if (this.budgetForm.invalid) this.budgetForm.markAllAsTouched();
       return;
     }
 
+    this.isSaving = true;
     const formVals = this.budgetForm.value;
     const dateVal = formVals.month instanceof Date ? formVals.month : new Date(formVals.month);
     const year = dateVal.getFullYear();
@@ -205,6 +208,7 @@ export class BudgetComponent implements OnInit {
           setTimeout(() => this.closeModal(), 1500);
         },
         error: (err) => {
+          this.isSaving = false;
           this.errorMessage = err.error?.error || err.error?.message || 'Failed to update budget limit';
         }
       });
@@ -216,6 +220,7 @@ export class BudgetComponent implements OnInit {
           setTimeout(() => this.closeModal(), 1500);
         },
         error: (err) => {
+          this.isSaving = false;
           this.errorMessage = err.error?.error || err.error?.message || 'Failed to create budget';
         }
       });
